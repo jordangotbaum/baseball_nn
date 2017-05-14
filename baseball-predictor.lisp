@@ -3,6 +3,7 @@
 ;;a team struct to hold all of the pertinent info for a given team
 
 (defstruct team
+  name
   ;;an integer for games played by the team
   games
   ;;integer for team at-bats
@@ -213,6 +214,7 @@
 (defconstant VISITOR-ERRORS 46)
 (defconstant VISITOR-STARTER 102)
 
+
 ;;visiting team info
 ;;7 team   
 ;;9 game # 
@@ -225,6 +227,49 @@
 ;;23 opposing hits                 
 ;;104 starters id                    
 ;;105 starters name
+
+;;Team hashmap
+(defvar +teams+ (make-hash-table))
+
+;;Pitcher hashmap
+(defvar +pitchers+ (make-hash-table))
+
+;; Hashmap initialization - Maps all team abbreviations to team
+;; structs with their fields filled in.
+(defun init-hashmap
+  ()
+  (setf (get-hash "LAA" +teams+) (make-team :name "Los_Angeles_Angels"))
+  (setf (get-hash "ARI" +teams+) (make-team :name "Arizona_Diamondbacks"))
+  (setf (get-hash "BOS" +teams+) (make-team :name "Boston_Red_Sox"))
+  (setf (get-hash "ATL" +teams+) (make-team :name "Atlanta_Braves"))
+  (setf (get-hash "CHA" +teams+) (make-team :name "Chicago_White_Sox"))
+  (setf (get-hash "BAL" +teams+) (make-team :name "Baltimore_Orioles"))
+  (setf (get-hash "CIN" +teams+) (make-team :name "Cincinatti_Reds"))
+  (setf (get-hash "CHN" +teams+) (make-team :name "Chicago_Cubs"))
+  (setf (get-hash "NYA" +teams+) (make-team :name "New_York_Yankees"))
+  (setf (get-hash "LAN" +teams+) (make-team :name "Los_Angeles_Dodgers"))
+  (setf (get-hash "CLE" +teams+) (make-team :name "Cleveland_Indians"))
+  (setf (get-hash "TOR" +teams+) (make-team :name "Toronto_Blue_Jays"))
+  (setf (get-hash "NYN" +teams+) (make-team :name "New_York_Mets"))
+  (setf (get-hash "SFN" +teams+) (make-team :name "San_Francisco_Giants"))
+  (setf (get-hash "SLN" +teams+) (make-team :name "St_Louis_Cardinals"))
+  (setf (get-hash "DET" +teams+) (make-team :name "Detroit_Tigers"))
+  (setf (get-hash "TEX" +teams+) (make-team :name "Texas_Rangers"))
+  (setf (get-hash "PIT" +teams+) (make-team :name "Pittsburgh_Pirates"))
+  (setf (get-hash "HOU" +teams+) (make-team :name "Houston_Astros"))
+  (setf (get-hash "PHI" +teams+) (make-team :name "Philadelphia_Phillies"))
+  (setf (get-hash "KCA" +teams+) (make-team :name "Kansas_City_Royals"))
+  (setf (get-hash "WAS" +teams+) (make-team :name "Washington_Nationals"))
+  (setf (get-hash "MIN" +teams+) (make-team :name "Minnesota_Twins"))
+  (setf (get-hash "SEA" +teams+) (make-team :name "Seattle_Mariners"))
+  (setf (get-hash "MIA" +teams+) (make-team :name "Miami_Marlins"))
+  (setf (get-hash "COL" +teams+) (make-team :name "Colorado_Rockies"))
+  (setf (get-hash "MIL" +teams+) (make-team :name "Milwaukee_Brewers"))
+  (setf (get-hash "SDN" +teams+) (make-team :name "San_Diego_Padres"))
+  (setf (get-hash "OAK" +teams+) (make-team :name "Oakland_Athletics"))
+  (setf (get-hash "TBA" +teams+) (make-team :name "Tampa_Bay_Rays"))
+  )
+
 
 
 ;;incrementing functions

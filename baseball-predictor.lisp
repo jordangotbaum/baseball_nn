@@ -140,7 +140,7 @@
 ;; Output: the pitchers slugging% against
 
 (defun get-slugging-against
-    (team)
+    (pitcher)
   (let ((slugging (coerce (/ (pitcher-total-bases pitcher)
                              (pitcher-ABs pitcher))
                           'float)))
@@ -166,8 +166,8 @@
 			   'float)))
     (when (> avg-diff 1.0)
       1.0)
-    (when (< avg-diff 0.0)
-      0.0)
+    (when (< avg-diff -1.0)
+      -1.0)
     avg-diff))
 
 
@@ -187,32 +187,32 @@
 ;;102 starters id
 ;;103 starters name
 
-(defconstant HOME-TEAM 4)
-(defconstant HOME-GAME 6)
+(defconstant HOME-TEAM 6)
+(defconstant HOME-GAME 8)
 (defconstant HOME-RUNS 10)
-(defconstant HOME-AB 22)
-(defconstant HOME-HITS 23)
-(defconstant HOME-2B 24)
-(defconstant HOME-3B 25)
-(defconstant HOME-HR 26)
-(defconstant HOME-RBI 27)
-(defconstant HOME-ER 41)
-(defconstant HOME-PUTOUTS 44)
-(defconstant HOME-ERRORS 46)
-(defconstant HOME-STARTER 102)
-(defconstant VISITOR-TEAM 4)
-(defconstant VISITOR-GAME 6)
-(defconstant VISITOR-RUNS 10)
-(defconstant VISITOR-AB 22)
-(defconstant VISITOR-HITS 23)
-(defconstant VISITOR-2B 24)
-(defconstant VISITOR-3B 25)
-(defconstant VISITOR-HR 26)
-(defconstant VISITOR-RBI 27)
-(defconstant VISITOR-ER 41)
-(defconstant VISITOR-PUTOUTS 44)
-(defconstant VISITOR-ERRORS 46)
-(defconstant VISITOR-STARTER 102)
+(defconstant HOME-AB 49)
+(defconstant HOME-HITS 50)
+(defconstant HOME-2B 51)
+(defconstant HOME-3B 52)
+(defconstant HOME-HR 53)
+(defconstant HOME-RBI 54)
+(defconstant HOME-ER 68)
+(defconstant HOME-PUTOUTS 71)
+(defconstant HOME-ERRORS 73)
+(defconstant HOME-STARTER 103)
+(defconstant VISITOR-TEAM 3)
+(defconstant VISITOR-GAME 5)
+(defconstant VISITOR-RUNS 9)
+(defconstant VISITOR-AB 21)
+(defconstant VISITOR-HITS 22)
+(defconstant VISITOR-2B 23)
+(defconstant VISITOR-3B 24)
+(defconstant VISITOR-HR 25)
+(defconstant VISITOR-RBI 26)
+(defconstant VISITOR-ER 40)
+(defconstant VISITOR-PUTOUTS 43)
+(defconstant VISITOR-ERRORS 45)
+(defconstant VISITOR-STARTER 101)
 
 
 ;;visiting team info
@@ -307,7 +307,7 @@
 (defun inc-run-diffs
     (team runs opp-runs)
   (let ((next (team-next-altered team)))
-    (setf (team-next-altered team) (+ 1 next))
+    (setf (team-next-altered team) (mod (+ 1 next) 10))
     (setf (aref (team-run-diffs team)  next) 
       (- runs opp-runs))))
 
@@ -339,18 +339,18 @@
 
 (defun update-home-team
     (team game)
-  (let ((ABs (aref game HOME-TEAM-AB))
-	(hits (aref game HOME-TEAM-HITS))
-	(RBIs (aref game HOME-TEAM-RBI))
-	(errors (aref game HOME-TEAM-ERRORS))
-	(home-HRs (aref game HOME-TEAM-HR))
-	(home-2B (aref game HOME-TEAM-2B))
-	(home-3B (aref game HOME-TEAM-3B))
-	(visitor-HRs (aref game VISITOR-TEAM-HR))
-	(visitor-2B (aref game VISITOR-TEAM-2B))
-	(visitor-3B (aref game VISITOR-TEAM-3B))
-	(home-runs (aref game HOME-RUNS))
-	(visitor-runs (aref game VISITOR-RUNS)))
+  (let ((ABs (nth HOME-TEAM-AB game))
+	(hits (nth HOME-TEAM-HITS game))
+	(RBIs (nth HOME-TEAM-RBI game))
+	(errors (nth HOME-TEAM-ERRORS game))
+	(home-HRs (nth HOME-TEAM-HR game))
+	(home-2B (nth HOME-TEAM-2B game))
+	(home-3B (nth HOME-TEAM-3B game))
+	(visitor-HRs (nth VISITOR-TEAM-HR game))
+	(visitor-2B (nth VISITOR-TEAM-2B game))
+	(visitor-3B (nth VISITOR-TEAM-3B game))
+	(home-runs (nth HOME-RUNS game))
+	(visitor-runs (nth VISITOR-RUNS game)))
     (inc-games team)
     (inc-ABs team ABs)
     (inc-hits team hits)
@@ -361,18 +361,18 @@
 
 (defun update-visiting-team
     (team game)
-  (let ((ABs (aref game VISITING-TEAM-AB))
-	(hits (aref game VISITING-TEAM-HITS))
-	(RBIs (aref game VISITING-TEAM-RBI))
-	(errors (aref game VISITING-TEAM-ERRORS))
-	(home-HRs (aref game HOME-TEAM-HR))
-        (home-2B (aref game HOME-TEAM-2B))
-        (home-3B (aref game HOME-TEAM-3B))
-        (visitor-HRs (aref game VISITOR-TEAM-HR))
-        (visitor-2B (aref game VISITOR-TEAM-2B))
-        (visitor-3B (aref game VISITOR-TEAM-3B))
-        (home-runs (aref game HOME-RUNS))
-        (visitor-runs (aref game VISITOR-RUNS)))
+  (let ((ABs (nth VISITING-TEAM-AB game))
+	(hits (nth VISITING-TEAM-HITS game))
+	(RBIs (nth VISITING-TEAM-RBI game))
+	(errors (nth VISITING-TEAM-ERRORS game))
+	(home-HRs (nth HOME-TEAM-HR game))
+        (home-2B (nth HOME-TEAM-2B game))
+        (home-3B (nth HOME-TEAM-3B game))
+        (visitor-HRs (nth VISITOR-TEAM-HR game))
+        (visitor-2B (nth VISITOR-TEAM-2B game))
+        (visitor-3B (nth VISITOR-TEAM-3B game))
+        (home-runs (nth HOME-RUNS game))
+        (visitor-runs (nth VISITOR-RUNS game)))
     (inc-games team)
     (inc-ABs team ABs)
     (inc-hits team hits)
@@ -383,13 +383,13 @@
 
 (defun update-home-pitcher
     (pitcher game)
-  (let ((ABs (aref game VISITING-TEAM-AB))
-	(ERs (aref game HOME-TEAM-ER))
-	(hits (aref game VISITING-TEAM-HITS))
-	(putouts (aref game HOME-TEAM-PUTOUTS))
-	(visitor-HRs (aref game VISITOR-TEAM-HR))
-        (visitor-2B (aref game VISITOR-TEAM-2B))
-        (visitor-3B (aref game VISITOR-TEAM-3B)))
+  (let ((ABs (nth VISITING-TEAM-AB game))
+	(ERs (nth HOME-TEAM-ER game))
+	(hits (nth VISITING-TEAM-HITS game))
+	(putouts (nth HOME-TEAM-PUTOUTS game))
+	(visitor-HRs (nth VISITOR-TEAM-HR game))
+        (visitor-2B (nth VISITOR-TEAM-2B game))
+        (visitor-3B (nth VISITOR-TEAM-3B game)))
     (inc-pitch-ABs pitcher ABs)
     (inc-pitch-ERs pitcher ERs)
     (inc-pitch-hits pitcher hits)
@@ -398,13 +398,13 @@
 
 (defun update-visiting-pitcher
     (pitcher game)
-  (let ((ABs (aref game HOME-TEAM-AB))
-	(ERs (aref game VISITING-TEAM-ER))
-	(hits (aref game HOME-TEAM-HITS))
-	(putouts (aref game VISITING-TEAM-PUTOUTS))
-	(home-HRs (aref game HOME-TEAM-HR))
-        (home-2B (aref game HOME-TEAM-2B))
-        (home-3B (aref game HOME-TEAM-3B)))
+  (let ((ABs (nth HOME-TEAM-AB game))
+	(ERs (nth VISITING-TEAM-ER game))
+	(hits (nth HOME-TEAM-HITS game))
+	(putouts (nth VISITING-TEAM-PUTOUTS game))
+	(home-HRs (nth HOME-TEAM-HR game))
+        (home-2B (nth HOME-TEAM-2B game))
+        (home-3B (nth HOME-TEAM-3B game)))
     (inc-pitch-ABs pitcher ABs)
     (inc-pitch-ERs pitcher ERs)
     (inc-pitch-hits pitcher hits)
@@ -417,6 +417,8 @@
   (update-visiting-team visiting-team game)
   (update-home-pitcher home-pitcher game)
   (update-visiting-pitcher visiting-pitcher game))
+
+
 
 (defun csv-reader
     (file)
@@ -436,24 +438,7 @@
     (format t "~A~%" (aref x 4))
     (format t "~A~%" (aref x 5))
     (format t "~A~%" (aref x 6))))
-    
 
-
-
-
-;;take in the values from the file
-;;if the game is 1 then make a new struct for the team and
-;;;;;;;;;upddate the struct according to the values
-;;otherwise update the values in the file using the above
-;;;;;;;;funcs and then send the correct inputs to the nn to train
-;;;;;;;;the nn and do this for the whole season file
-;;after reset all of the structs and run the trained nn on a new
-;;;;;;;;season while still updating the teams as they go through
-;;;;;;;;the season
-;;keep track of the games where which team is predicted correctly
-;;;;;;;as wwell as the number of games played can do this on a basis
-;;;;;;;dividing the season into parts as well to see if it gets better
-;;;;;;;later in the season
 
 
 ;;;  NN struct
@@ -555,6 +540,27 @@
     ;; return the NN
     nn))
 
+
+;;;  ERASE-OUTPUTS
+;;; -----------------------------------------------------
+;;;  INPUT:  NN, a neural network
+;;;  OUTPUT:  T
+;;;  SIDE-EFFECT: Destructively modifies NN by setting all output
+;;;   values to NIL (usually done before the FEED-FORWARD process).
+
+(defun erase-outputs (nn)
+  (let ((out-vecks (nn-output-vecks nn))
+	(num (nn-num-layers nn))
+	(lay-sizes (nn-layer-sizes nn)))
+    ;; For each layer...
+    (dotimes (i num)
+      (let ((num-neurons (svref lay-sizes i))
+	        (outputs (svref out-vecks i)))
+	;; For each neuron in that layer...
+	(dotimes (j num-neurons)
+	    ;; Set that neuron's output value to NIL
+	    (setf (svref outputs j) nil))))
+    t))
 
 
 ;;;  SET-INPUTS
@@ -735,16 +741,159 @@
 
 
 
+;;;  GET-OUTPUT-FOR
+;;; --------------------------------------
+;;;  INPUTS:  NN, a neural network
+;;;           INPUTS, a list of input values for the neurons in the
+;;;             input layer of NN
+;;;  OUTPUT:  A vector of output values corresponding to those inputs
+;;;            (resulting from doing FEED-FORWARD)
+
+(defun get-output-for (nn inputs)
+  (feed-forward nn inputs)
+  (let* ((num-layers (nn-num-layers nn))
+	  (out-vecks (nn-output-vecks nn)))
+    (svref out-vecks (1- num-layers))))
 
 
 
-;;need to be able to extract the teams and pitchers needed to run
-;;the nn on and get the inputs
+
+;;train-nn-year
+;;-------------------------------------
+;; Inputs: nn, a neural network
+;;         alpha, training sensitivity
+;;         file, a csv file with the the game data for the year
+;; Output: none
+;; Side Effect: updates the nn
 
 (defun train-nn-year
-    (nn file)
-  (let* ((year (csv-reader file))
-	 (size (list-length year)))
+    (nn alpha file)
+  (let ((year (csv-reader file)))
+    ;;for every game in the year
     (dolist (game year)
-      (let))))
-    
+      ;;get all of the teams and pitchers involved
+      (let* ((home-team-id (nth HOME-TEAM game))
+	     (home-team (gethash home-team-id +teams+))
+	     (visitor-team-id (nth VISITOR-TEAM game))
+	     (visitor-team (gethash visitor-team-id +teams+))
+	     (home-pitcher-id (nth HOME-STARTER game))
+	     (home-pitcher (gethash home-pitcher-id +pitchers+))
+	     (visitor-pitcher-id (nth VISITOR-STARTER game))
+	     (visitor-pitcher (gathash visitor-pitcher +pitchers+)))
+	;;when either starter hasnt thrown yet then make a struct for them
+	;;and put it into the the hash table
+	(when (null home-pitcher)
+	  (progn (setf (gethash home-pitcher-id +pitchers+) (make-pitcher))
+		 (setf (home-pitcher (gethash home-pitcher-id +pitchers+)))))
+	(when (null visitor-pitcher)
+	  (progn (setf (gethash visitor-pitcher-id +pitchers+) (make-pitcher))
+		 (setf (visitor-pitcher (gethash visitor-pitcher-id +pitchers+)))))
+	;;create a list of the input values and a vector of the desired output
+	(let ((inputs (list (get-RBIs home-team) (get-BA home-team)
+			    (get-errors home-team) (get-slugging home-team)
+			    (get-run-diff home-team) (get-ERA home-pitcher)
+			    (get-BAA home-pitcher) (get-slugging-against home-pitcher)
+			    (get-RBIs visitor-team) (get-BA visitor-team)
+			    (get-errors visitor-team) (get-slugging visitor-team)
+			    (get-run-diff visitor-team) (get-ERA visitor-pitcher)
+			    (get-BAA visitor-pitcher) (get-slugging-against visitor-pitcher)))
+	      (output (vector (- (nth VISITOR-RUNS game) (nth HOME-RUNS game)))))
+	  ;;train the nn on the given inputs and outputs for the game
+	  (train-one nn alpha inputs output)
+	  ;;update the structs based off of the game data
+	  (update-structs home-team visitor-team home-pitcher visitor-pitcher game))))))
+
+
+;; test-nn-year
+;;---------------------------------------
+;; Input: nn, neural network
+;;        file, a csv of game files for a year
+;; Output: the prediction percentage for the nn on the year
+
+(defun test-nn-year
+    (nn file)
+  (let ((year (csv-reader file))
+	(total 0)
+	(correct 0))
+    ;;for each game in the year
+    (dolist (game year)
+      ;;get the teams and pitchers involved in the game
+      (let* ((home-team-id (nth HOME-TEAM game))
+             (home-team (gethash home-team-id +teams+))
+             (visitor-team-id (nth VISITOR-TEAM game))
+             (visitor-team (gethash visitor-team-id +teams+))
+             (home-pitcher-id (nth HOME-STARTER game))
+             (home-pitcher (gethash home-pitcher-id +pitchers+))
+             (visitor-pitcher-id (nth VISITOR-STARTER game))
+             (visitor-pitcher (gathash visitor-pitcher +pitchers+)))
+	;;when either pitcher has not thrown yet create a struct for them
+	;;and put it into the hash table
+        (when (null home-pitcher)
+          (progn (setf (gethash home-pitcher-id +pitchers+) (make-pitcher))
+                 (setf (home-pitcher (gethash home-pitcher-id +pitchers+)))))
+        (when (null visitor-pitcher)
+          (progn (setf (gethash visitor-pitcher-id +pitchers+) (make-pitcher))
+                 (setf (visitor-pitcher (gethash visitor-pitcher-id +pitchers+)))))
+	;;get the input list as well as the desired and actual outputs
+        (let* ((inputs (list (get-RBIs home-team) (get-BA home-team)
+			     (get-errors home-team) (get-slugging home-team)
+			     (get-run-diff home-team) (get-ERA home-pitcher)
+			     (get-BAA home-pitcher) (get-slugging-against home-pitcher)
+			     (get-RBIs visitor-team) (get-BA visitor-team)
+			     (get-errors visitor-team) (get-slugging visitor-team)
+			     (get-run-diff visitor-team) (get-ERA visitor-pitcher)
+			     (get-BAA visitor-pitcher) (get-slugging-against visitor-pitcher)))
+	       (result (- (nth VISITOR-RUNS game) (nth HOME-RUNS game)))
+	       (result-nn (svref (get-output-for nn inputs) 0)))
+	  ;;increase the total games by 1
+	  (setf total (+ 1 total))
+	  ;;if the nn predicted the winner then we increase the correct by 1
+	  (when (or (and (> result 0) (> result-nn 0))
+		    (and (< result 0) (< result-nn 0)))
+	    (setf correct (+ 1 correct))))))
+    ;;after going through the whole year return the prediction percentage
+    (coerce (/ correct total) 'float)))
+
+
+;; train-all
+;; -----------------------------------
+;; Inputs: nn, a neural network
+;;         aplha, training sensitivity
+;; Output: none
+;; Side Effect: trains the nn on 2005-2015 data
+
+(defun train-all
+    (nn alpha)
+  (train-nn-year nn alpha "GL2005.csv")
+  (setf +pitchers+ (make-hash-table))
+  (init-hashmap)
+  (train-nn-year nn alpha "GL2006.csv")
+  (setf +pitchers+ (make-hash-table))
+  (init-hashmap)
+  (train-nn-year nn alpha "GL2007.csv")
+  (setf +pitchers+ (make-hash-table))
+  (init-hashmap)
+  (train-nn-year nn alpha "GL2008.csv")
+  (setf +pitchers+ (make-hash-table))
+  (init-hashmap)
+  (train-nn-year nn alpha "GL2009.csv")
+  (setf +pitchers+ (make-hash-table))
+  (init-hashmap)
+  (train-nn-year nn alpha "GL2010.csv")
+  (setf +pitchers+ (make-hash-table))
+  (init-hashmap)
+  (train-nn-year nn alpha "GL2011.csv")
+  (setf +pitchers+ (make-hash-table))
+  (init-hashmap)
+  (train-nn-year nn alpha "GL2012.csv")
+  (setf +pitchers+ (make-hash-table))
+  (init-hashmap)
+  (train-nn-year nn alpha "GL2013.csv")
+  (setf +pitchers+ (make-hash-table))
+  (init-hashmap)
+  (train-nn-year nn alpha "GL2014.csv")
+  (setf +pitchers+ (make-hash-table))
+  (init-hashmap)
+  (train-nn-year nn alpha "GL2015.csv")
+  (setf +pitchers+ (make-hash-table))
+  (init-hashmap))

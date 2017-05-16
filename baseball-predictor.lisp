@@ -1,4 +1,48 @@
-(load "read-csv.lisp")
+
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (load "read-csv.lisp")
+  (use-package :read-csv))
+
+;;Home team info
+;;4 team
+;;6 game #
+;;10 runs scored
+;;22-27 ABs,hits,2B,3B,HR,RBI
+;;41 ER
+;;44 putouts
+;;46 errors
+;;50 opposing ABs
+;;51 opposing hits
+;;102 starters id
+;;103 starters name
+(defconstant NON-ZERO 0.9)
+(defconstant HOME-TEAM 6)
+(defconstant HOME-TEAM-GAME 8)
+(defconstant HOME-TEAM-RUNS 10)
+(defconstant HOME-TEAM-AB 49)
+(defconstant HOME-TEAM-HITS 50)
+(defconstant HOME-TEAM-2B 51)
+(defconstant HOME-TEAM-3B 52)
+(defconstant HOME-TEAM-HR 53)
+(defconstant HOME-TEAM-RBI 54)
+(defconstant HOME-TEAM-ER 68)
+(defconstant HOME-TEAM-PUTOUTS 71)
+(defconstant HOME-TEAM-ERRORS 73)
+(defconstant HOME-TEAM-STARTER 103)
+(defconstant VISITOR-TEAM 3)
+(defconstant VISITOR-TEAM-GAME 5)
+(defconstant VISITOR-TEAM-RUNS 9)
+(defconstant VISITOR-TEAM-AB 21)
+(defconstant VISITOR-TEAM-HITS 22)
+(defconstant VISITOR-TEAM-2B 23)
+(defconstant VISITOR-TEAM-3B 24)
+(defconstant VISITOR-TEAM-HR 25)
+(defconstant VISITOR-TEAM-RBI 26)
+(defconstant VISITOR-TEAM-ER 40)
+(defconstant VISITOR-TEAM-PUTOUTS 43)
+(defconstant VISITOR-TEAM-ERRORS 45)
+(defconstant VISITOR-TEAM-STARTER 101)
+
 
 ;;a team struct to hold all of the pertinent info for a given team
 
@@ -22,6 +66,18 @@
   total-bases
   )
 
+(defun init-team
+  (name)
+  (make-team :name name
+    :games NON-ZERO
+    :ABs NON-ZERO
+    :hits 0
+    :RBIs 0
+    :errors 0
+    :run-diffs (make-array 10 :initial-element 0)
+    :next-altered 0
+    :total-bases 0))
+
 ;;a pitcher struct that will keep information on the games that a
 ;;certain pitcher pitches
 
@@ -38,7 +94,14 @@
   total-bases
   )
 
-
+(defun init-pitcher
+  ()
+  (make-pitcher
+    :outs NON-ZERO
+    :ERs 0
+    :hits 0
+    :ABs NON-ZERO
+    :total-bases 0))
 
 
 ;;functions to get inputs to the neural network
@@ -161,7 +224,7 @@
 		  (aref arr 2) (aref arr 3)
 		  (aref arr 4) (aref arr 5)
                   (aref arr 6) (aref arr 7)
-		  (are farr 8) (aref arr 9)))
+		  (aref arr 8) (aref arr 9)))
 	 (avg-diff (coerce (/ diff 90)
 			   'float)))
     (when (> avg-diff 1.0)
@@ -174,45 +237,7 @@
 
 
 
-;;Home team info
-;;4 team
-;;6 game #
-;;10 runs scored
-;;22-27 ABs,hits,2B,3B,HR,RBI
-;;41 ER
-;;44 putouts
-;;46 errors
-;;50 opposing ABs
-;;51 opposing hits
-;;102 starters id
-;;103 starters name
 
-(defconstant HOME-TEAM 6)
-(defconstant HOME-GAME 8)
-(defconstant HOME-RUNS 10)
-(defconstant HOME-AB 49)
-(defconstant HOME-HITS 50)
-(defconstant HOME-2B 51)
-(defconstant HOME-3B 52)
-(defconstant HOME-HR 53)
-(defconstant HOME-RBI 54)
-(defconstant HOME-ER 68)
-(defconstant HOME-PUTOUTS 71)
-(defconstant HOME-ERRORS 73)
-(defconstant HOME-STARTER 103)
-(defconstant VISITOR-TEAM 3)
-(defconstant VISITOR-GAME 5)
-(defconstant VISITOR-RUNS 9)
-(defconstant VISITOR-AB 21)
-(defconstant VISITOR-HITS 22)
-(defconstant VISITOR-2B 23)
-(defconstant VISITOR-3B 24)
-(defconstant VISITOR-HR 25)
-(defconstant VISITOR-RBI 26)
-(defconstant VISITOR-ER 40)
-(defconstant VISITOR-PUTOUTS 43)
-(defconstant VISITOR-ERRORS 45)
-(defconstant VISITOR-STARTER 101)
 
 
 ;;visiting team info
@@ -229,45 +254,49 @@
 ;;105 starters name
 
 ;;Team hashmap
-(defvar +teams+ (make-hash-table))
+(defvar +teams+ (make-hash-table :test #'equal))
 
 ;;Pitcher hashmap
-(defvar +pitchers+ (make-hash-table))
+(defvar +pitchers+ (make-hash-table :test #'equal))
 
 ;; Hashmap initialization - Maps all team abbreviations to team
 ;; structs with their fields filled in.
 (defun init-hashmap
   ()
-  (setf (get-hash "LAA" +teams+) (make-team :name "Los_Angeles_Angels"))
-  (setf (get-hash "ARI" +teams+) (make-team :name "Arizona_Diamondbacks"))
-  (setf (get-hash "BOS" +teams+) (make-team :name "Boston_Red_Sox"))
-  (setf (get-hash "ATL" +teams+) (make-team :name "Atlanta_Braves"))
-  (setf (get-hash "CHA" +teams+) (make-team :name "Chicago_White_Sox"))
-  (setf (get-hash "BAL" +teams+) (make-team :name "Baltimore_Orioles"))
-  (setf (get-hash "CIN" +teams+) (make-team :name "Cincinatti_Reds"))
-  (setf (get-hash "CHN" +teams+) (make-team :name "Chicago_Cubs"))
-  (setf (get-hash "NYA" +teams+) (make-team :name "New_York_Yankees"))
-  (setf (get-hash "LAN" +teams+) (make-team :name "Los_Angeles_Dodgers"))
-  (setf (get-hash "CLE" +teams+) (make-team :name "Cleveland_Indians"))
-  (setf (get-hash "TOR" +teams+) (make-team :name "Toronto_Blue_Jays"))
-  (setf (get-hash "NYN" +teams+) (make-team :name "New_York_Mets"))
-  (setf (get-hash "SFN" +teams+) (make-team :name "San_Francisco_Giants"))
-  (setf (get-hash "SLN" +teams+) (make-team :name "St_Louis_Cardinals"))
-  (setf (get-hash "DET" +teams+) (make-team :name "Detroit_Tigers"))
-  (setf (get-hash "TEX" +teams+) (make-team :name "Texas_Rangers"))
-  (setf (get-hash "PIT" +teams+) (make-team :name "Pittsburgh_Pirates"))
-  (setf (get-hash "HOU" +teams+) (make-team :name "Houston_Astros"))
-  (setf (get-hash "PHI" +teams+) (make-team :name "Philadelphia_Phillies"))
-  (setf (get-hash "KCA" +teams+) (make-team :name "Kansas_City_Royals"))
-  (setf (get-hash "WAS" +teams+) (make-team :name "Washington_Nationals"))
-  (setf (get-hash "MIN" +teams+) (make-team :name "Minnesota_Twins"))
-  (setf (get-hash "SEA" +teams+) (make-team :name "Seattle_Mariners"))
-  (setf (get-hash "MIA" +teams+) (make-team :name "Miami_Marlins"))
-  (setf (get-hash "COL" +teams+) (make-team :name "Colorado_Rockies"))
-  (setf (get-hash "MIL" +teams+) (make-team :name "Milwaukee_Brewers"))
-  (setf (get-hash "SDN" +teams+) (make-team :name "San_Diego_Padres"))
-  (setf (get-hash "OAK" +teams+) (make-team :name "Oakland_Athletics"))
-  (setf (get-hash "TBA" +teams+) (make-team :name "Tampa_Bay_Rays"))
+  (setf (gethash "LAA" +teams+) (init-team "Los_Angeles_Angels"))  
+  (setf (gethash "ARI" +teams+) (init-team "Arizona_Diamondbacks"))
+  (setf (gethash "BOS" +teams+) (init-team "Boston_Red_Sox"))
+  (setf (gethash "ATL" +teams+) (init-team "Atlanta_Braves"))
+  (setf (gethash "CHA" +teams+) (init-team "Chicago_White_Sox"))
+  (setf (gethash "BAL" +teams+) (init-team "Baltimore_Orioles"))
+  (setf (gethash "CIN" +teams+) (init-team "Cincinatti_Reds"))
+  (setf (gethash "CHN" +teams+) (init-team "Chicago_Cubs"))
+  (setf (gethash "NYA" +teams+) (init-team "New_York_Yankees"))
+  (setf (gethash "LAN" +teams+) (init-team "Los_Angeles_Dodgers"))
+  (setf (gethash "CLE" +teams+) (init-team "Cleveland_Indians"))
+  (setf (gethash "TOR" +teams+) (init-team "Toronto_Blue_Jays"))
+  (setf (gethash "NYN" +teams+) (init-team "New_York_Mets"))
+  (setf (gethash "SFN" +teams+) (init-team "San_Francisco_Giants"))
+  (setf (gethash "SLN" +teams+) (init-team "St_Louis_Cardinals"))
+  (setf (gethash "DET" +teams+) (init-team "Detroit_Tigers"))
+  (setf (gethash "TEX" +teams+) (init-team "Texas_Rangers"))
+  (setf (gethash "PIT" +teams+) (init-team "Pittsburgh_Pirates"))
+  (setf (gethash "HOU" +teams+) (init-team "Houston_Astros"))
+  (setf (gethash "PHI" +teams+) (init-team "Philadelphia_Phillies"))
+  (setf (gethash "KCA" +teams+) (init-team "Kansas_City_Royals"))
+  (setf (gethash "WAS" +teams+) (init-team "Washington_Nationals"))
+  (setf (gethash "MIN" +teams+) (init-team "Minnesota_Twins"))
+  (setf (gethash "SEA" +teams+) (init-team "Seattle_Mariners"))
+  (setf (gethash "MIA" +teams+) (init-team "Miami_Marlins"))  
+  (setf (gethash "COL" +teams+) (init-team "Colorado_Rockies"))
+  (setf (gethash "MIL" +teams+) (init-team "Milwaukee_Brewers"))
+  (setf (gethash "SDN" +teams+) (init-team "San_Diego_Padres"))
+  (setf (gethash "OAK" +teams+) (init-team "Oakland_Athletics"))
+  (setf (gethash "TBA" +teams+) (init-team "Tampa_Bay_Rays"))
+  ;; Map older teams (that changed names) to new teams.
+  (setf (gethash "ANA" +teams+) (gethash "LAA" +teams+))
+  (setf (gethash "MON" +teams+) (gethash "WAS" +teams+))
+  (setf (gethash "FLO" +teams+) (gethash "MIA" +teams+))
   )
 
 
@@ -276,12 +305,16 @@
 
 (defun inc-games
     (team)
-  (setf (team-games team) (+ 1 (team-games team))))
+  (if (eq (team-games team) NON-ZERO)
+    (setf (team-games team) 1)
+    (incf (team-games team))))
 
 (defun inc-ABs
     (team ABs)
-  (setf (team-ABs team) 
-    (+ (team-ABs team) ABs)))
+  (if (eq (team-ABs team) NON-ZERO)
+    (setf (team-ABs team) ABs)
+    (setf (team-ABs team) 
+      (+ (team-ABs team) ABs))))
 
 (defun inc-hits
     (team hits)
@@ -313,8 +346,10 @@
 
 (defun inc-pitch-outs
     (pitcher outs)
-  (setf (pitcher-outs pitcher)
-    (+ (pitcher-outs pitcher) outs)))
+  (if (eq (pitcher-outs pitcher) NON-ZERO)
+    (setf (pitcher-outs pitcher) outs)
+    (setf (pitcher-outs pitcher)
+      (+ (pitcher-outs pitcher) outs))))
 
 (defun inc-pitch-ERs
     (pitcher ERs)
@@ -328,8 +363,10 @@
 
 (defun inc-pitch-ABs
     (pitcher ABs)
-  (setf (pitcher-ABs pitcher)
-    (+ (pitcher-ABs pitcher) ABs)))
+  (if (eq (pitcher-ABs pitcher) NON-ZERO)
+    (setf (pitcher-ABs pitcher) ABs)
+    (setf (pitcher-ABs pitcher)
+      (+ (pitcher-ABs pitcher) ABs))))
 
 (defun inc-pitch-total-bases
     (pitcher hits doubl tripl hr)
@@ -339,18 +376,18 @@
 
 (defun update-home-team
     (team game)
-  (let ((ABs (nth HOME-TEAM-AB game))
-	(hits (nth HOME-TEAM-HITS game))
-	(RBIs (nth HOME-TEAM-RBI game))
-	(errors (nth HOME-TEAM-ERRORS game))
-	(home-HRs (nth HOME-TEAM-HR game))
-	(home-2B (nth HOME-TEAM-2B game))
-	(home-3B (nth HOME-TEAM-3B game))
-	(visitor-HRs (nth VISITOR-TEAM-HR game))
-	(visitor-2B (nth VISITOR-TEAM-2B game))
-	(visitor-3B (nth VISITOR-TEAM-3B game))
-	(home-runs (nth HOME-RUNS game))
-	(visitor-runs (nth VISITOR-RUNS game)))
+  (let ((ABs (parse-integer (nth HOME-TEAM-AB game)))
+	(hits (parse-integer (nth HOME-TEAM-HITS game)))
+	(RBIs (parse-integer (nth HOME-TEAM-RBI game)))
+	(errors (parse-integer (nth HOME-TEAM-ERRORS game)))
+	(home-HRs (parse-integer (nth HOME-TEAM-HR game)))
+	(home-2B (parse-integer (nth HOME-TEAM-2B game)))
+	(home-3B (parse-integer (nth HOME-TEAM-3B game)))
+	; (visitor-HRs (parse-integer (nth VISITOR-TEAM-HR game)))
+	; (visitor-2B (parse-integer (nth VISITOR-TEAM-2B game)))
+	; (visitor-3B (parse-integer (nth VISITOR-TEAM-3B game)))
+	(home-runs (parse-integer (nth HOME-TEAM-RUNS game)))
+	(visitor-runs (parse-integer (nth VISITOR-TEAM-RUNS game))))
     (inc-games team)
     (inc-ABs team ABs)
     (inc-hits team hits)
@@ -361,18 +398,18 @@
 
 (defun update-visiting-team
     (team game)
-  (let ((ABs (nth VISITING-TEAM-AB game))
-	(hits (nth VISITING-TEAM-HITS game))
-	(RBIs (nth VISITING-TEAM-RBI game))
-	(errors (nth VISITING-TEAM-ERRORS game))
-	(home-HRs (nth HOME-TEAM-HR game))
-        (home-2B (nth HOME-TEAM-2B game))
-        (home-3B (nth HOME-TEAM-3B game))
-        (visitor-HRs (nth VISITOR-TEAM-HR game))
-        (visitor-2B (nth VISITOR-TEAM-2B game))
-        (visitor-3B (nth VISITOR-TEAM-3B game))
-        (home-runs (nth HOME-RUNS game))
-        (visitor-runs (nth VISITOR-RUNS game)))
+  (let ((ABs (parse-integer (nth VISITOR-TEAM-AB game)))
+	(hits (parse-integer (nth VISITOR-TEAM-HITS game)))
+	(RBIs (parse-integer (nth VISITOR-TEAM-RBI game)))
+	(errors (parse-integer (nth VISITOR-TEAM-ERRORS game)))
+	; (home-HRs (parse-integer (nth HOME-TEAM-HR game)))
+ ;  (home-2B (parse-integer (nth HOME-TEAM-2B game)))
+ ;  (home-3B (parse-integer (nth HOME-TEAM-3B game)))
+  (visitor-HRs (parse-integer (nth VISITOR-TEAM-HR game)))
+  (visitor-2B (parse-integer (nth VISITOR-TEAM-2B game)))
+  (visitor-3B (parse-integer (nth VISITOR-TEAM-3B game)))
+  (home-runs (parse-integer (nth HOME-TEAM-RUNS game)))
+  (visitor-runs (parse-integer (nth VISITOR-TEAM-RUNS game))))
     (inc-games team)
     (inc-ABs team ABs)
     (inc-hits team hits)
@@ -383,13 +420,13 @@
 
 (defun update-home-pitcher
     (pitcher game)
-  (let ((ABs (nth VISITING-TEAM-AB game))
-	(ERs (nth HOME-TEAM-ER game))
-	(hits (nth VISITING-TEAM-HITS game))
-	(putouts (nth HOME-TEAM-PUTOUTS game))
-	(visitor-HRs (nth VISITOR-TEAM-HR game))
-        (visitor-2B (nth VISITOR-TEAM-2B game))
-        (visitor-3B (nth VISITOR-TEAM-3B game)))
+  (let ((ABs (parse-integer (nth VISITOR-TEAM-AB game)))
+	(ERs (parse-integer (nth HOME-TEAM-ER game)))
+	(hits (parse-integer (nth VISITOR-TEAM-HITS game)))
+	(putouts (parse-integer (nth HOME-TEAM-PUTOUTS game)))
+	(visitor-HRs (parse-integer (nth VISITOR-TEAM-HR game)))
+  (visitor-2B (parse-integer (nth VISITOR-TEAM-2B game)))
+  (visitor-3B (parse-integer (nth VISITOR-TEAM-3B game))))
     (inc-pitch-ABs pitcher ABs)
     (inc-pitch-ERs pitcher ERs)
     (inc-pitch-hits pitcher hits)
@@ -398,13 +435,13 @@
 
 (defun update-visiting-pitcher
     (pitcher game)
-  (let ((ABs (nth HOME-TEAM-AB game))
-	(ERs (nth VISITING-TEAM-ER game))
-	(hits (nth HOME-TEAM-HITS game))
-	(putouts (nth VISITING-TEAM-PUTOUTS game))
-	(home-HRs (nth HOME-TEAM-HR game))
-        (home-2B (nth HOME-TEAM-2B game))
-        (home-3B (nth HOME-TEAM-3B game)))
+  (let ((ABs (parse-integer (nth HOME-TEAM-AB game)))
+	(ERs (parse-integer (nth VISITOR-TEAM-ER game)))
+	(hits (parse-integer (nth HOME-TEAM-HITS game)))
+	(putouts (parse-integer (nth VISITOR-TEAM-PUTOUTS game)))
+	(home-HRs (parse-integer (nth HOME-TEAM-HR game)))
+        (home-2B (parse-integer (nth HOME-TEAM-2B game)))
+        (home-3B (parse-integer (nth HOME-TEAM-3B game))))
     (inc-pitch-ABs pitcher ABs)
     (inc-pitch-ERs pitcher ERs)
     (inc-pitch-hits pitcher hits)
@@ -412,9 +449,9 @@
     (inc-pitch-total-bases pitcher hits home-2B home-3B home-HRs)))
 
 (defun update-structs
-    (home-team road-team home-pitcher road-pitcher game)
-  (update-home-team home-team game)
-  (update-visiting-team visiting-team game)
+    (home-team-v visiting-team-v home-pitcher visiting-pitcher game)
+  (update-home-team home-team-v game)
+  (update-visiting-team visiting-team-v game)
   (update-home-pitcher home-pitcher game)
   (update-visiting-pitcher visiting-pitcher game))
 
@@ -427,6 +464,12 @@
 	 (data (make-array len)))
     (read-sequence data stream)
     data)))
+
+(defun read-csv-i
+  (file)
+  (use-package :read-csv)
+  (with-open-file (s file)
+    (parse-csv s)))
 
 (defun csv-test
     (file)
@@ -768,41 +811,57 @@
 
 (defun train-nn-year
     (nn alpha file)
-  (let ((year (csv-reader file)))
+  (let ((year (read-csv-i file))
+    ;(ctr 0)
+    )
     ;;for every game in the year
     (dolist (game year)
+      ; (format t "Game: ~A~%" game)
       ;;get all of the teams and pitchers involved
       (let* ((home-team-id (nth HOME-TEAM game))
-	     (home-team (gethash home-team-id +teams+))
+	     (home-team-v (gethash home-team-id +teams+))
 	     (visitor-team-id (nth VISITOR-TEAM game))
-	     (visitor-team (gethash visitor-team-id +teams+))
-	     (home-pitcher-id (nth HOME-STARTER game))
+	     (visitor-team-v (gethash visitor-team-id +teams+))
+	     (home-pitcher-id (nth HOME-TEAM-STARTER game))
 	     (home-pitcher (gethash home-pitcher-id +pitchers+))
-	     (visitor-pitcher-id (nth VISITOR-STARTER game))
-	     (visitor-pitcher (gathash visitor-pitcher +pitchers+)))
+	     (visitor-pitcher-id (nth VISITOR-TEAM-STARTER game))
+	     (visitor-pitcher (gethash visitor-pitcher-id +pitchers+)))
+      ; (format t "Home-team-id: ~A~%" home-team-id)
+      ; (format t "Type of id: ~A~%" (type-of home-team-id))
+      ; (format t "Home-team: ~A~%" home-team-v)
+      ; (format t "Vis-team-id: ~A~%" visitor-team-id)
+      ; (format t "Vis-team: ~A~%" visitor-team-v)
 	;;when either starter hasnt thrown yet then make a struct for them
 	;;and put it into the the hash table
 	(when (null home-pitcher)
-	  (progn (setf (gethash home-pitcher-id +pitchers+) (make-pitcher))
-		 (setf (home-pitcher (gethash home-pitcher-id +pitchers+)))))
+	  (progn (setf (gethash home-pitcher-id +pitchers+) (init-pitcher))
+		 (setf home-pitcher (gethash home-pitcher-id +pitchers+))))
 	(when (null visitor-pitcher)
-	  (progn (setf (gethash visitor-pitcher-id +pitchers+) (make-pitcher))
-		 (setf (visitor-pitcher (gethash visitor-pitcher-id +pitchers+)))))
+	  (progn (setf (gethash visitor-pitcher-id +pitchers+) (init-pitcher))
+		 (setf visitor-pitcher (gethash visitor-pitcher-id +pitchers+))))
 	;;create a list of the input values and a vector of the desired output
-	(let ((inputs (list (get-RBIs home-team) (get-BA home-team)
-			    (get-errors home-team) (get-slugging home-team)
-			    (get-run-diff home-team) (get-ERA home-pitcher)
+	(let* ((inputs (list (get-RBIs home-team-v) (get-BA home-team-v)
+			    (get-errors home-team-v) (get-slugging home-team-v)
+			    (get-run-diff home-team-v) (get-ERA home-pitcher)
 			    (get-BAA home-pitcher) (get-slugging-against home-pitcher)
-			    (get-RBIs visitor-team) (get-BA visitor-team)
-			    (get-errors visitor-team) (get-slugging visitor-team)
-			    (get-run-diff visitor-team) (get-ERA visitor-pitcher)
+			    (get-RBIs visitor-team-v) (get-BA visitor-team-v)
+			    (get-errors visitor-team-v) (get-slugging visitor-team-v)
+			    (get-run-diff visitor-team-v) (get-ERA visitor-pitcher)
 			    (get-BAA visitor-pitcher) (get-slugging-against visitor-pitcher)))
-	      (output (vector (- (nth VISITOR-RUNS game) (nth HOME-RUNS game)))))
+        (vis-runs (parse-integer (nth VISITOR-TEAM-RUNS game)))
+        (h-runs (parse-integer (nth HOME-TEAM-RUNS game)))
+	      (output (list (- vis-runs h-runs))))
 	  ;;train the nn on the given inputs and outputs for the game
+    ; (format t "Train-nn-year reached train-one for iteration ~A~%" ctr)
 	  (train-one nn alpha inputs output)
 	  ;;update the structs based off of the game data
-	  (update-structs home-team visitor-team home-pitcher visitor-pitcher game))))))
+    ; (format t "Train-nn-year reached update-struct for iteration ~A~%" ctr)
+    ; (incf ctr)
+	  (update-structs home-team-v visitor-team-v home-pitcher visitor-pitcher game))))))
 
+
+(defconstant SCALE_FACT 1000)
+(defconstant REDUC 1.1)
 
 ;; test-nn-year
 ;;---------------------------------------
@@ -812,45 +871,58 @@
 
 (defun test-nn-year
     (nn file)
-  (let ((year (csv-reader file))
+  (let ((year (read-csv-i file))
 	(total 0)
-	(correct 0))
+	(correct 0)
+  (ctr 1))
     ;;for each game in the year
     (dolist (game year)
       ;;get the teams and pitchers involved in the game
       (let* ((home-team-id (nth HOME-TEAM game))
-             (home-team (gethash home-team-id +teams+))
+             (home-team-v (gethash home-team-id +teams+))
              (visitor-team-id (nth VISITOR-TEAM game))
-             (visitor-team (gethash visitor-team-id +teams+))
-             (home-pitcher-id (nth HOME-STARTER game))
+             (visitor-team-v (gethash visitor-team-id +teams+))
+             (home-pitcher-id (nth HOME-TEAM-STARTER game))
              (home-pitcher (gethash home-pitcher-id +pitchers+))
-             (visitor-pitcher-id (nth VISITOR-STARTER game))
-             (visitor-pitcher (gathash visitor-pitcher +pitchers+)))
+             (visitor-pitcher-id (nth VISITOR-TEAM-STARTER game))
+             (visitor-pitcher (gethash visitor-pitcher-id +pitchers+)))
 	;;when either pitcher has not thrown yet create a struct for them
 	;;and put it into the hash table
         (when (null home-pitcher)
-          (progn (setf (gethash home-pitcher-id +pitchers+) (make-pitcher))
-                 (setf (home-pitcher (gethash home-pitcher-id +pitchers+)))))
+          (progn (setf (gethash home-pitcher-id +pitchers+) (init-pitcher))
+                 (setf home-pitcher (gethash home-pitcher-id +pitchers+))))
         (when (null visitor-pitcher)
-          (progn (setf (gethash visitor-pitcher-id +pitchers+) (make-pitcher))
-                 (setf (visitor-pitcher (gethash visitor-pitcher-id +pitchers+)))))
+          (progn (setf (gethash visitor-pitcher-id +pitchers+) (init-pitcher))
+                 (setf visitor-pitcher (gethash visitor-pitcher-id +pitchers+))))
 	;;get the input list as well as the desired and actual outputs
-        (let* ((inputs (list (get-RBIs home-team) (get-BA home-team)
-			     (get-errors home-team) (get-slugging home-team)
-			     (get-run-diff home-team) (get-ERA home-pitcher)
+        (let* ((inputs (list (get-RBIs home-team-v) (get-BA home-team-v)
+			     (get-errors home-team-v) (get-slugging home-team-v)
+			     (get-run-diff home-team-v) (get-ERA home-pitcher)
 			     (get-BAA home-pitcher) (get-slugging-against home-pitcher)
-			     (get-RBIs visitor-team) (get-BA visitor-team)
-			     (get-errors visitor-team) (get-slugging visitor-team)
-			     (get-run-diff visitor-team) (get-ERA visitor-pitcher)
+			     (get-RBIs visitor-team-v) (get-BA visitor-team-v)
+			     (get-errors visitor-team-v) (get-slugging visitor-team-v)
+			     (get-run-diff visitor-team-v) (get-ERA visitor-pitcher)
 			     (get-BAA visitor-pitcher) (get-slugging-against visitor-pitcher)))
-	       (result (- (nth VISITOR-RUNS game) (nth HOME-RUNS game)))
-	       (result-nn (svref (get-output-for nn inputs) 0)))
+          (vis-runs (parse-integer (nth VISITOR-TEAM-RUNS game)))
+          (h-runs (parse-integer (nth HOME-TEAM-RUNS game)))
+	        (result (- vis-runs h-runs))
+	        (result-nn (svref (get-output-for nn inputs) 0)))
 	  ;;increase the total games by 1
-	  (setf total (+ 1 total))
+    ; (when (> ctr 1200)
+	     (incf total)
+       ; )
 	  ;;if the nn predicted the winner then we increase the correct by 1
-	  (when (or (and (> result 0) (> result-nn 0))
-		    (and (< result 0) (< result-nn 0)))
-	    (setf correct (+ 1 correct))))))
+	  
+    (format t "Game result: ~A~%" result)
+    (format t "NN result: ~A~%" result-nn)
+    (when ;(and 
+      (or (and (> result 0) (> result-nn 0))
+		    (and (< result 0) (< result-nn 0))
+        (eql result result-nn))
+        ;(> ctr 1200))
+	    (incf correct))
+    ;(incf ctr)
+    )))
     ;;after going through the whole year return the prediction percentage
     (coerce (/ correct total) 'float)))
 
@@ -864,36 +936,58 @@
 
 (defun train-all
     (nn alpha)
-  (train-nn-year nn alpha "GL2005.csv")
+  (init-hashmap)
+  (setf +pitchers+ (make-hash-table))
+  (train-nn-year nn alpha "bb_data/GL2005.csv")
   (setf +pitchers+ (make-hash-table))
   (init-hashmap)
-  (train-nn-year nn alpha "GL2006.csv")
+  (train-nn-year nn alpha "bb_data/GL2006.csv")
   (setf +pitchers+ (make-hash-table))
   (init-hashmap)
-  (train-nn-year nn alpha "GL2007.csv")
+  (train-nn-year nn alpha "bb_data/GL2007.csv")
   (setf +pitchers+ (make-hash-table))
   (init-hashmap)
-  (train-nn-year nn alpha "GL2008.csv")
+  (train-nn-year nn alpha "bb_data/GL2008.csv")
   (setf +pitchers+ (make-hash-table))
   (init-hashmap)
-  (train-nn-year nn alpha "GL2009.csv")
+  (train-nn-year nn alpha "bb_data/GL2009.csv")
   (setf +pitchers+ (make-hash-table))
   (init-hashmap)
-  (train-nn-year nn alpha "GL2010.csv")
+  (train-nn-year nn alpha "bb_data/GL2010.csv")
   (setf +pitchers+ (make-hash-table))
   (init-hashmap)
-  (train-nn-year nn alpha "GL2011.csv")
+  (train-nn-year nn alpha "bb_data/GL2011.csv")
   (setf +pitchers+ (make-hash-table))
   (init-hashmap)
-  (train-nn-year nn alpha "GL2012.csv")
+  (train-nn-year nn alpha "bb_data/GL2012.csv")
   (setf +pitchers+ (make-hash-table))
   (init-hashmap)
-  (train-nn-year nn alpha "GL2013.csv")
+  (train-nn-year nn alpha "bb_data/GL2013.csv")
   (setf +pitchers+ (make-hash-table))
   (init-hashmap)
-  (train-nn-year nn alpha "GL2014.csv")
+  (train-nn-year nn alpha "bb_data/GL2014.csv")
   (setf +pitchers+ (make-hash-table))
   (init-hashmap)
-  (train-nn-year nn alpha "GL2015.csv")
+  (train-nn-year nn alpha "bb_data/GL2015.csv")
   (setf +pitchers+ (make-hash-table))
   (init-hashmap))
+
+(defun test-train-nn-year
+  ()
+  (let
+    ((nn (init-nn '(16 8 1)))
+    (alph 0.02)
+    (file "bb_data/GL2005.csv"))
+    (init-hashmap)
+    (setf +pitchers+ (make-hash-table))
+    (train-nn-year nn alph file)
+    (init-hashmap)
+    (setf +pitchers+ (make-hash-table))
+    (train-nn-year nn alph "bb_data/GL2006.csv")
+    (init-hashmap)
+    (setf +pitchers+ (make-hash-table))
+    (train-nn-year nn alph "bb_data/GL2007.csv")
+    (init-hashmap)
+    (setf +pitchers+ (make-hash-table))
+    (train-nn-year nn alph "bb_data/GL2008.csv")
+    (test-nn-year nn "bb_data/GL2009.csv")))

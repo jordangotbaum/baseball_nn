@@ -66,6 +66,8 @@
   total-bases
   )
 
+;;inits a team struct with the initial values set to 0 except
+;;the ones that would cause divided by 0 errors
 (defun init-team
   (name)
   (make-team :name name
@@ -94,6 +96,7 @@
   total-bases
   )
 
+;;inits the pitcher structure the same way as the team struct
 (defun init-pitcher
   ()
   (make-pitcher
@@ -115,32 +118,37 @@
 ;;         divided by 9 to make it a value between 0 and 1
 ;;         if the value is >1 return 1.0
 
-; (defun get-ERA
-;     (pitcher)
-;   (let* ((ER-per-out (coerce (/ (pitcher-ERs pitcher)
-; 				(pitcher-outs pitcher))
-; 			     'float))
-; 	 (our-ERA (* ER-per-out 3)))
-;     (if (> our-ERA 1.0)
-; 	1.0
-;       our-ERA)))
+;;ERA is earned run average
 
 (defun get-ERA
-   (pitcher)
- (coerce (* 27 (/ (pitcher-ERs pitcher)
-		   (pitcher-outs pitcher)))
-	  'float))
+    (pitcher)
+  (let* ((ER-per-out (coerce (/ (pitcher-ERs pitcher)
+        (pitcher-outs pitcher))
+           'float))
+   (our-ERA (* ER-per-out 3)))
+  ;;make sure value is normalized between -1 and 1
+    (if (> our-ERA 1.0)
+  1.0
+      our-ERA)))
+
+; (defun get-ERA
+;    (pitcher)
+;  (coerce (* 27 (/ (pitcher-ERs pitcher)
+;        (pitcher-outs pitcher)))
+;     'float))
 
 ; get-BAA
 ;;--------------------------------
 ;; Input: pitcher a pitcher struct
 ;; Output: the BAA in the games the pitcher throws
 
+;;BAA is batting average against the pitcher
+
 (defun get-BAA
     (pitcher)
   (coerce (/ (pitcher-hits pitcher)
-	     (pitcher-ABs pitcher))
-	  'float))  
+       (pitcher-ABs pitcher))
+    'float))  
 
 ;;team functions
 
@@ -150,32 +158,37 @@
 ;; Output: the RBIs per innning or 1.0 if this value
 ;;         is larger than 1.0
 
-; (defun get-RBIs
-;     (team)
-;   (let* ((RBI-game (coerce (/ (team-RBIs team)
-; 			      (team-games team))
-; 			   'float))
-; 	 (RBI-inning (/ RBI-game 9)))
-;     (if (> RBI-inning 1.0)
-; 	1.0
-;       RBI-inning)))
+;;RBIs are runs batted in 
 
 (defun get-RBIs
-   (team)
- (coerce (/ (team-RBIs team)
-	     (team-games team))
-	  'float))  
+    (team)
+  (let* ((RBI-game (coerce (/ (team-RBIs team)
+            (team-games team))
+         'float))
+   (RBI-inning (/ RBI-game 9)))
+  ;;make sure value is normalized between -1 and 1
+    (if (> RBI-inning 1.0)
+  1.0
+      RBI-inning)))
+
+; (defun get-RBIs
+;    (team)
+;  (coerce (/ (team-RBIs team)
+;        (team-games team))
+;     'float))  
 
 ;; get-BA
 ;;-------------------------------
 ;; Input: team a team struct
 ;; Output: the teams batting average
 
+;;Batting average is hits / at bats
+
 (defun get-BA
     (team)
   (coerce (/ (team-hits team)
-	     (team-ABs team))
-	  'float))
+       (team-ABs team))
+    'float))
 
 ;; get-errors
 ;;------------------------------
@@ -183,34 +196,38 @@
 ;; Output: the teams errors per inning or 1
 ;;         if it is greater than 1 somehow
 
-; (defun get-errors
-;     (team)
-;   (let* ((errors-game (coerce (/ (team-errors team)
-; 				 (team-games team))
-; 			      'float))
-; 	 (errors-inning (/ errors-game 9)))
-;     (if (> errors-inning 1.0)
-; 	1.0
-;       errors-inning)))
-
 (defun get-errors
-   (team)
- (coerce (/ (team-errors team)                                                                           
-	     (team-games team))                                                                          
-	  'float))  
+    (team)
+  (let* ((errors-game (coerce (/ (team-errors team)
+         (team-games team))
+            'float))
+   (errors-inning (/ errors-game 9)))
+  ;;make sure value is normalized between -1 and 1
+    (if (> errors-inning 1.0)
+  1.0
+      errors-inning)))
+
+; (defun get-errors
+;    (team)
+;  (coerce (/ (team-errors team)                                                                           
+;        (team-games team))                                                                          
+;     'float))  
 
 ;; get-slugging
 ;; --------------------------
 ;; Input: team, a team struct
 ;; Output: the teams slugging%
 
+;;slugging is total bases / at bats
+
 (defun get-slugging
     (team)
   (let ((slugging (coerce (/ (team-total-bases team)
-			     (team-ABs team))
-			  'float)))
+           (team-ABs team))
+        'float)))
+  ;;make sure value is normalized between -1 and 1
     (if (> slugging 1.0)
-	1.0
+  1.0
       slugging)))
 
 ;; get-slugging-against
@@ -218,11 +235,14 @@
 ;; Input: pitcher, a pitcher struct
 ;; Output: the pitchers slugging% against
 
+;;slugging is total bases / at bats
+
 (defun get-slugging-against
     (pitcher)
   (let ((slugging (coerce (/ (pitcher-total-bases pitcher)
                              (pitcher-ABs pitcher))
                           'float)))
+    ;;make sure value is normalized between -1 and 1
     (if (> slugging 1.0)
         1.0
       slugging)))
@@ -233,34 +253,37 @@
 ;; Output: the teams average run diff over
 ;;         the last 10 games
 
-; (defun get-run-diff
-;     (team)
-;   (let* ((arr (team-run-diffs team))
-; 	 (diff (+ (aref arr 0) (aref arr 1)
-; 		  (aref arr 2) (aref arr 3)
-; 		  (aref arr 4) (aref arr 5)
-;                   (aref arr 6) (aref arr 7)
-; 		  (aref arr 8) (aref arr 9)))
-; 	 (avg-diff (coerce (/ diff 90)
-; 			   'float)))
-;     (when (> avg-diff 1.0)
-;       1.0)
-;     (when (< avg-diff -1.0)
-;       -1.0)
-;     avg-diff))
-
-
 (defun get-run-diff
-   (team)
- (let* ((arr (team-run-diffs team))
-        (diff (+ (aref arr 0) (aref arr 1)
-                 (aref arr 2) (aref arr 3)
-                 (aref arr 4) (aref arr 5)
-                 (aref arr 6) (aref arr 7)
-                 (aref arr 8) (aref arr 9)))
-        (avg-diff (coerce (/ diff 10)
-                          'float)))
-   avg-diff))
+    (team)
+  ;;get the array of run differentials and take the sum of the values
+  ;;divide the sum by 90 to get it on a per inning basis
+  (let* ((arr (team-run-diffs team))
+   (diff (+ (aref arr 0) (aref arr 1)
+      (aref arr 2) (aref arr 3)
+      (aref arr 4) (aref arr 5)
+                  (aref arr 6) (aref arr 7)
+      (aref arr 8) (aref arr 9)))
+   (avg-diff (coerce (/ diff 90)
+         'float)))
+  ;;to make sure the value is normalized between -1 and 1
+    (when (> avg-diff 1.0)
+      1.0)
+    (when (< avg-diff -1.0)
+      -1.0)
+    avg-diff))
+
+
+; (defun get-run-diff
+;    (team)
+;  (let* ((arr (team-run-diffs team))
+;         (diff (+ (aref arr 0) (aref arr 1)
+;                  (aref arr 2) (aref arr 3)
+;                  (aref arr 4) (aref arr 5)
+;                  (aref arr 6) (aref arr 7)
+;                  (aref arr 8) (aref arr 9)))
+;         (avg-diff (coerce (/ diff 10)
+;                           'float)))
+;    avg-diff))
 
 
 
@@ -331,40 +354,53 @@
 
 ;;incrementing functions
 
+;;increments the games for a team by 1
 (defun inc-games
     (team)
-  (if (eq (team-games team) NON-ZERO)
+  (if (eql (team-games team) NON-ZERO)
     (setf (team-games team) 1)
     (incf (team-games team))))
 
+;;increments the at bats for a team by the number they had in a given game
+;;only called by the update structs which will handle input
 (defun inc-ABs
     (team ABs)
-  (if (eq (team-ABs team) NON-ZERO)
+  (if (eql (team-ABs team) NON-ZERO)
     (setf (team-ABs team) ABs)
     (setf (team-ABs team) 
       (+ (team-ABs team) ABs))))
 
+;;increments the hits for a team by the number they had in a given game
+;;only called by the update structs which will handle input
 (defun inc-hits
     (team hits)
   (setf (team-hits team)
     (+ (team-hits team) hits)))
 
+;;increments the RBIs for a team by the number they had in a given game
+;;only called by the update structs which will handle input
 (defun inc-RBIs
     (team RBIs)
   (setf (team-RBIs team)
     (+ (team-RBIs team) RBIs)))
 
+;;increments the errors for a team by the number they had in a given game
+;;only called by the update structs which will handle input
 (defun inc-errors
     (team errors)
   (setf (team-errors team) 
     (+ (team-errors team) errors)))
 
+;;increments the total bases for a team by the number they had in a given game
+;;only called by the update structs which will handle inputs
 (defun inc-total-bases
     (team hits doubl tripl hr)
   (setf (team-total-bases team)
      (+ (team-total-bases team)
-	hits doubl tripl tripl hr hr hr)))
+  hits doubl tripl tripl hr hr hr)))
 
+;;increments the run differential for a team by the differential in a given game
+;;only called by the update structs which will handle inputs
 (defun inc-run-diffs
     (team runs opp-runs)
   (let ((next (team-next-altered team)))
@@ -372,50 +408,62 @@
     (setf (aref (team-run-diffs team)  next) 
       (- runs opp-runs))))
 
+;;increments the outs for a pitcher by the number they had in a given game
+;;only called by the update structs which will handle input
 (defun inc-pitch-outs
     (pitcher outs)
-  (if (eq (pitcher-outs pitcher) NON-ZERO)
+  (if (eql (pitcher-outs pitcher) NON-ZERO)
     (setf (pitcher-outs pitcher) outs)
     (setf (pitcher-outs pitcher)
       (+ (pitcher-outs pitcher) outs))))
 
+;;increments the ERs for a pitcher by the number they had in a given game
+;;only called by the update structs which will handle input
 (defun inc-pitch-ERs
     (pitcher ERs)
   (setf (pitcher-ERs pitcher)
     (+ (pitcher-ERs pitcher) ERs)))
 
+;;increments the hits for a pitcher by the number they had in a given game
+;;only called by the update structs which will handle input
 (defun inc-pitch-hits
     (pitcher hits)
   (setf (pitcher-hits pitcher)
     (+ (pitcher-hits pitcher) hits)))
 
+;;increments the at bats for a pitcher by the number they had in a given game
+;;only called by the update structs which will handle input
 (defun inc-pitch-ABs
     (pitcher ABs)
-  (if (eq (pitcher-ABs pitcher) NON-ZERO)
+  (if (eql (pitcher-ABs pitcher) NON-ZERO)
     (setf (pitcher-ABs pitcher) ABs)
     (setf (pitcher-ABs pitcher)
       (+ (pitcher-ABs pitcher) ABs))))
 
+;;increments the total bases for a pitcher by the number they had in a given game
+;;only called by the update structs which will handle input
 (defun inc-pitch-total-bases
     (pitcher hits doubl tripl hr)
   (setf (pitcher-total-bases pitcher)
     (+ (pitcher-total-bases pitcher) 
        hits doubl tripl tripl hr hr hr)))
 
+;;calls all of the incrementing functions on the correct inputs based on the 
+;;game and that the team is the home team
 (defun update-home-team
     (team game)
   (let ((ABs (parse-integer (nth HOME-TEAM-AB game)))
-	(hits (parse-integer (nth HOME-TEAM-HITS game)))
-	(RBIs (parse-integer (nth HOME-TEAM-RBI game)))
-	(errors (parse-integer (nth HOME-TEAM-ERRORS game)))
-	(home-HRs (parse-integer (nth HOME-TEAM-HR game)))
-	(home-2B (parse-integer (nth HOME-TEAM-2B game)))
-	(home-3B (parse-integer (nth HOME-TEAM-3B game)))
-	; (visitor-HRs (parse-integer (nth VISITOR-TEAM-HR game)))
-	; (visitor-2B (parse-integer (nth VISITOR-TEAM-2B game)))
-	; (visitor-3B (parse-integer (nth VISITOR-TEAM-3B game)))
-	(home-runs (parse-integer (nth HOME-TEAM-RUNS game)))
-	(visitor-runs (parse-integer (nth VISITOR-TEAM-RUNS game))))
+  (hits (parse-integer (nth HOME-TEAM-HITS game)))
+  (RBIs (parse-integer (nth HOME-TEAM-RBI game)))
+  (errors (parse-integer (nth HOME-TEAM-ERRORS game)))
+  (home-HRs (parse-integer (nth HOME-TEAM-HR game)))
+  (home-2B (parse-integer (nth HOME-TEAM-2B game)))
+  (home-3B (parse-integer (nth HOME-TEAM-3B game)))
+  ; (visitor-HRs (parse-integer (nth VISITOR-TEAM-HR game)))
+  ; (visitor-2B (parse-integer (nth VISITOR-TEAM-2B game)))
+  ; (visitor-3B (parse-integer (nth VISITOR-TEAM-3B game)))
+  (home-runs (parse-integer (nth HOME-TEAM-RUNS game)))
+  (visitor-runs (parse-integer (nth VISITOR-TEAM-RUNS game))))
     (inc-games team)
     (inc-ABs team ABs)
     (inc-hits team hits)
@@ -424,13 +472,15 @@
     (inc-total-bases team hits home-2B home-3B home-HRs)
     (inc-run-diffs team home-runs visitor-runs)))
 
+;;calls all of the incrementing functions on the correct inputs based on the 
+;;game and that the team is the road team
 (defun update-visiting-team
     (team game)
   (let ((ABs (parse-integer (nth VISITOR-TEAM-AB game)))
-	(hits (parse-integer (nth VISITOR-TEAM-HITS game)))
-	(RBIs (parse-integer (nth VISITOR-TEAM-RBI game)))
-	(errors (parse-integer (nth VISITOR-TEAM-ERRORS game)))
-	; (home-HRs (parse-integer (nth HOME-TEAM-HR game)))
+  (hits (parse-integer (nth VISITOR-TEAM-HITS game)))
+  (RBIs (parse-integer (nth VISITOR-TEAM-RBI game)))
+  (errors (parse-integer (nth VISITOR-TEAM-ERRORS game)))
+  ; (home-HRs (parse-integer (nth HOME-TEAM-HR game)))
  ;  (home-2B (parse-integer (nth HOME-TEAM-2B game)))
  ;  (home-3B (parse-integer (nth HOME-TEAM-3B game)))
   (visitor-HRs (parse-integer (nth VISITOR-TEAM-HR game)))
@@ -446,13 +496,15 @@
     (inc-total-bases team hits visitor-2B visitor-3B visitor-HRs)
     (inc-run-diffs team visitor-runs home-runs)))
 
+;;calls all of the incrementing functions on the correct inputs based on the 
+;;game and that the pitcher is the home pitcher
 (defun update-home-pitcher
     (pitcher game)
   (let ((ABs (parse-integer (nth VISITOR-TEAM-AB game)))
-	(ERs (parse-integer (nth HOME-TEAM-ER game)))
-	(hits (parse-integer (nth VISITOR-TEAM-HITS game)))
-	(putouts (parse-integer (nth HOME-TEAM-PUTOUTS game)))
-	(visitor-HRs (parse-integer (nth VISITOR-TEAM-HR game)))
+  (ERs (parse-integer (nth HOME-TEAM-ER game)))
+  (hits (parse-integer (nth VISITOR-TEAM-HITS game)))
+  (putouts (parse-integer (nth HOME-TEAM-PUTOUTS game)))
+  (visitor-HRs (parse-integer (nth VISITOR-TEAM-HR game)))
   (visitor-2B (parse-integer (nth VISITOR-TEAM-2B game)))
   (visitor-3B (parse-integer (nth VISITOR-TEAM-3B game))))
     (inc-pitch-ABs pitcher ABs)
@@ -461,13 +513,15 @@
     (inc-pitch-outs pitcher putouts)
     (inc-pitch-total-bases pitcher hits visitor-2B visitor-3B visitor-HRs)))
 
+;;calls all of the incrementing functions on the correct inputs based on the 
+;;game and that the pitcher is the road pitcher
 (defun update-visiting-pitcher
     (pitcher game)
   (let ((ABs (parse-integer (nth HOME-TEAM-AB game)))
-	(ERs (parse-integer (nth VISITOR-TEAM-ER game)))
-	(hits (parse-integer (nth HOME-TEAM-HITS game)))
-	(putouts (parse-integer (nth VISITOR-TEAM-PUTOUTS game)))
-	(home-HRs (parse-integer (nth HOME-TEAM-HR game)))
+  (ERs (parse-integer (nth VISITOR-TEAM-ER game)))
+  (hits (parse-integer (nth HOME-TEAM-HITS game)))
+  (putouts (parse-integer (nth VISITOR-TEAM-PUTOUTS game)))
+  (home-HRs (parse-integer (nth HOME-TEAM-HR game)))
         (home-2B (parse-integer (nth HOME-TEAM-2B game)))
         (home-3B (parse-integer (nth HOME-TEAM-3B game))))
     (inc-pitch-ABs pitcher ABs)
@@ -476,6 +530,8 @@
     (inc-pitch-outs pitcher putouts)
     (inc-pitch-total-bases pitcher hits home-2B home-3B home-HRs)))
 
+;;calls the functions to update the structs for both teams and pitchers
+;;based on the game
 (defun update-structs
     (home-team-v visiting-team-v home-pitcher visiting-pitcher game)
   (update-home-team home-team-v game)
@@ -484,31 +540,12 @@
   (update-visiting-pitcher visiting-pitcher game))
 
 
-
-(defun csv-reader
-    (file)
-  (with-open-file (stream file)
-  (let* ((len (file-length stream))
-	 (data (make-array len)))
-    (read-sequence data stream)
-    data)))
-
 (defun read-csv-i
   (file)
   (use-package :read-csv)
   (with-open-file (s file)
     (parse-csv s)))
 
-(defun csv-test
-    (file)
-  (let ((x (csv-reader file)))
-    ;;(format t "~A~%" (type-of x))
-    (format t "~A~%" (aref x 1))
-    (format t "~A~%" (aref x 2))
-    (format t "~A~%" (aref x 3))
-    (format t "~A~%" (aref x 4))
-    (format t "~A~%" (aref x 5))
-    (format t "~A~%" (aref x 6))))
 
 
 
@@ -568,46 +605,46 @@
 
 (defun init-nn (sizes-of-layers)
   (let* (;; NUM-LAYERS:  the number of layers in the network
-	 (num-layers (length sizes-of-layers))
-	 ;; LAYER-SIZES:  a vector whose ith element will say how many
-	 ;;  neurons are in layer i
-	 (layer-sizes (make-array num-layers))
-	 ;; OUTPUT-VECKS:  a vector of vectors.  The ith vector will
-	 ;;  contain output values for each neuron in layer i
-	 (output-vecks (make-array num-layers))
-	 ;; DELTA-VECKS:  similar to output-vecks, except they contain
-	 ;;  the delta values for each neuron
-	 (delta-vecks (make-array num-layers))
-	 ;; WEIGHT-ARRAYS:  see documentation of NN struct
-	 (weight-arrays (make-array (1- num-layers)))
-	 ;; NN: the network
-	 (nn (make-nn :num-layers num-layers
-		      :layer-sizes layer-sizes
-		      :output-vecks output-vecks
-		      :weight-arrays weight-arrays
-		      :delta-vecks delta-vecks)))
+   (num-layers (length sizes-of-layers))
+   ;; LAYER-SIZES:  a vector whose ith element will say how many
+   ;;  neurons are in layer i
+   (layer-sizes (make-array num-layers))
+   ;; OUTPUT-VECKS:  a vector of vectors.  The ith vector will
+   ;;  contain output values for each neuron in layer i
+   (output-vecks (make-array num-layers))
+   ;; DELTA-VECKS:  similar to output-vecks, except they contain
+   ;;  the delta values for each neuron
+   (delta-vecks (make-array num-layers))
+   ;; WEIGHT-ARRAYS:  see documentation of NN struct
+   (weight-arrays (make-array (1- num-layers)))
+   ;; NN: the network
+   (nn (make-nn :num-layers num-layers
+          :layer-sizes layer-sizes
+          :output-vecks output-vecks
+          :weight-arrays weight-arrays
+          :delta-vecks delta-vecks)))
     ;; For each layer...
     (dotimes (i num-layers)
       ;; Set the size of that layer (i.e., how many neurons)
       (setf (svref layer-sizes i) (nth i sizes-of-layers))
       ;; Create a vector of output values for the neurons in that layer
       (setf (svref output-vecks i) (make-array (svref layer-sizes i)
-					       :initial-element nil))
+                 :initial-element nil))
       ;; Create a vector of delta values for the neurons in that layer
       (setf (svref delta-vecks i) (make-array (svref layer-sizes i)
-					      :initial-element nil))
+                :initial-element nil))
       ;; For non-input neurons, create an array of weights
       ;; corresponding to edges between current layer and previous layer
       (when (> i 0)
-	(let* ((num-rows (svref layer-sizes (1- i)))
-	       (num-cols (svref layer-sizes i))
-	       ;; The array of weights
-	       (harry (make-array (list num-rows num-cols))))
-	  (setf (svref weight-arrays (1- i)) harry)
-	  ;; randomize weights
-	  (dotimes (i num-rows)
-	    (dotimes (j num-cols)
-	      (setf (aref harry i j) (- (/ (random 100) 100) 0.5)))))))
+  (let* ((num-rows (svref layer-sizes (1- i)))
+         (num-cols (svref layer-sizes i))
+         ;; The array of weights
+         (harry (make-array (list num-rows num-cols))))
+    (setf (svref weight-arrays (1- i)) harry)
+    ;; randomize weights
+    (dotimes (i num-rows)
+      (dotimes (j num-cols)
+        (setf (aref harry i j) (- (/ (random 100) 100) 0.5)))))))
     ;; return the NN
     nn))
 
@@ -621,16 +658,16 @@
 
 (defun erase-outputs (nn)
   (let ((out-vecks (nn-output-vecks nn))
-	(num (nn-num-layers nn))
-	(lay-sizes (nn-layer-sizes nn)))
+  (num (nn-num-layers nn))
+  (lay-sizes (nn-layer-sizes nn)))
     ;; For each layer...
     (dotimes (i num)
       (let ((num-neurons (svref lay-sizes i))
-	        (outputs (svref out-vecks i)))
-	;; For each neuron in that layer...
-	(dotimes (j num-neurons)
-	    ;; Set that neuron's output value to NIL
-	    (setf (svref outputs j) nil))))
+          (outputs (svref out-vecks i)))
+  ;; For each neuron in that layer...
+  (dotimes (j num-neurons)
+      ;; Set that neuron's output value to NIL
+      (setf (svref outputs j) nil))))
     t))
 
 
@@ -644,16 +681,16 @@
 
 (defun set-inputs (nn inputs)
   (let* ((out-vecks (nn-output-vecks nn))
-	 ;; OUT-VECK-ZERO:  the vector of "output" values for layer 0 
-	 (out-veck-zero (svref out-vecks 0))
-	 (num-inputs (svref (nn-layer-sizes nn) 0)))
+   ;; OUT-VECK-ZERO:  the vector of "output" values for layer 0 
+   (out-veck-zero (svref out-vecks 0))
+   (num-inputs (svref (nn-layer-sizes nn) 0)))
     (cond
      ;; CASE 1:  INPUTS has the right number of input values
      ((= num-inputs (length inputs))
       ;; For each input value...
       (dotimes (i num-inputs)
-	;; Set the "output" value for the corresponding neuron in layer 0 
-	(setf (svref out-veck-zero i) (nth i inputs)))
+  ;; Set the "output" value for the corresponding neuron in layer 0 
+  (setf (svref out-veck-zero i) (nth i inputs)))
       ;; return the NN
       nn)
      ;; Case 2:  Error!
@@ -673,6 +710,20 @@
    (t
     (/ 1.0 (+ 1 (exp (- x)))))))
 
+
+;; logit
+;;---------------------------
+;; inverse of sigmoid ln(x) - ln(1-x)
+
+(defun logit
+  (x)
+  (when (<= x 0)
+    (setq x 0.0001))
+  (when (>= x 1)
+    (setq x 0.9999))
+  (- (log x (exp 1)) (log (- 1 x) (exp 1))))
+
+
 ;;;  FEED-FORWARD
 ;;; ----------------------------------------------------------
 ;;;  INPUTS:  NN, a neural network
@@ -690,35 +741,35 @@
   (set-inputs nn inputs)
   
   (let ((num-layers (nn-num-layers nn))
-	(layer-sizes (nn-layer-sizes nn))
-	(output-vecks (nn-output-vecks nn))
-	(weight-arrays (nn-weight-arrays nn)))
+  (layer-sizes (nn-layer-sizes nn))
+  (output-vecks (nn-output-vecks nn))
+  (weight-arrays (nn-weight-arrays nn)))
   
     ;; For each LAYER from 1 onward (i.e., not including the input layer)
     (do ((lay-num 1 (1+ lay-num)))
 
-	;; Exit Condition
-	((= lay-num num-layers)
-	 nn)
+  ;; Exit Condition
+  ((= lay-num num-layers)
+   nn)
       
       ;; Body of DO
       (let* ((outputs (svref output-vecks lay-num))
-	     (prev-outputs (svref output-vecks (1- lay-num)))
-	     (num-prev-outputs (length prev-outputs))
-	     (weight-array (svref weight-arrays (1- lay-num))))
-	;; For each neuron in that layer...
-	(dotimes (neuron-num (svref layer-sizes lay-num))
-	  ;; Compute output value of that neuron 
-	  (setf (svref outputs neuron-num)
-	    ;; SIGMOID of the DOT-PRODUCT of WEIGHTS and INPUT VALUES
-	    ;;  (INPUTS for this neuron are OUTPUTS from neurons 
-	    ;;     in previous layer)
-	    (sigmoid (let ((dot-prod 0))
-		       (dotimes (j num-prev-outputs)
-			 (incf dot-prod
-			       (* (svref prev-outputs j)
-				  (aref weight-array j neuron-num))))
-		       dot-prod))))))))
+       (prev-outputs (svref output-vecks (1- lay-num)))
+       (num-prev-outputs (length prev-outputs))
+       (weight-array (svref weight-arrays (1- lay-num))))
+  ;; For each neuron in that layer...
+  (dotimes (neuron-num (svref layer-sizes lay-num))
+    ;; Compute output value of that neuron 
+    (setf (svref outputs neuron-num)
+      ;; SIGMOID of the DOT-PRODUCT of WEIGHTS and INPUT VALUES
+      ;;  (INPUTS for this neuron are OUTPUTS from neurons 
+      ;;     in previous layer)
+      (sigmoid (let ((dot-prod 0))
+           (dotimes (j num-prev-outputs)
+       (incf dot-prod
+             (* (svref prev-outputs j)
+          (aref weight-array j neuron-num))))
+           dot-prod))))))))
 
 
 
@@ -742,76 +793,76 @@
 
   ;; Back prop algorithm...
   (let* ((num-layers (nn-num-layers nn))
-	 (layer-sizes (nn-layer-sizes nn))
-	 ;; The index for the output layer
-	 (last-layer-index (1- num-layers))
-	 (num-output-neurons (svref layer-sizes last-layer-index))
-	 ;; The index for the layer just before the output layer
-	 (penult-layer-index (1- last-layer-index))
-	 ;;(num-penult-neurons (svref layer-sizes penult-layer-index))
-	 (output-vecks (nn-output-vecks nn))
-	 ;;(penult-output-veck (svref output-vecks penult-layer-index))
-	 (last-output-veck (svref output-vecks last-layer-index))
-	 (delta-vecks (nn-delta-vecks nn))
-	 (last-delta-veck (svref delta-vecks last-layer-index))
-	 (weight-arrays (nn-weight-arrays nn))
-	 ;;(last-weight-array (svref weight-arrays penult-layer-index))
-	 )
+   (layer-sizes (nn-layer-sizes nn))
+   ;; The index for the output layer
+   (last-layer-index (1- num-layers))
+   (num-output-neurons (svref layer-sizes last-layer-index))
+   ;; The index for the layer just before the output layer
+   (penult-layer-index (1- last-layer-index))
+   ;;(num-penult-neurons (svref layer-sizes penult-layer-index))
+   (output-vecks (nn-output-vecks nn))
+   ;;(penult-output-veck (svref output-vecks penult-layer-index))
+   (last-output-veck (svref output-vecks last-layer-index))
+   (delta-vecks (nn-delta-vecks nn))
+   (last-delta-veck (svref delta-vecks last-layer-index))
+   (weight-arrays (nn-weight-arrays nn))
+   ;;(last-weight-array (svref weight-arrays penult-layer-index))
+   )
     
     ;; for each neuron in the output layer:
     (dotimes (neuron-num num-output-neurons)
       (let* ((target-output (nth neuron-num target-outputs))
-	     (my-output  (svref last-output-veck neuron-num))
-	     (diffy (- target-output my-output)))
-	;;   DELTA_J = G'(IN_J) * (Y_J - A_J)
-	;;           = G(IN_J)*(1 - G(IN_J))*(Y_J - A_J)
-	;;           = A_J * (1 - A_J) * (Y_J - A_J)
-	(setf (svref last-delta-veck neuron-num)
-	  (* my-output (- 1 my-output) diffy))))
+       (my-output  (svref last-output-veck neuron-num))
+       (diffy (- target-output my-output)))
+  ;;   DELTA_J = G'(IN_J) * (Y_J - A_J)
+  ;;           = G(IN_J)*(1 - G(IN_J))*(Y_J - A_J)
+  ;;           = A_J * (1 - A_J) * (Y_J - A_J)
+  (setf (svref last-delta-veck neuron-num)
+    (* my-output (- 1 my-output) diffy))))
     
     ;; for each hidden layer...
     (do ((lay-num penult-layer-index (1- lay-num)))
-	;; exit
-	((= lay-num 0))
+  ;; exit
+  ((= lay-num 0))
       ;; BODY of DO
       ;; ---------------------------
       (let* ((num-neurons (svref layer-sizes lay-num))
-	     (curr-out-veck (svref output-vecks lay-num))
-	     (next-delta-veck (svref delta-vecks (1+ lay-num)))
-	     (my-delta-veck (svref delta-vecks lay-num))
-	     (num-neurons-next-layer (svref layer-sizes (1+ lay-num)))
-	     (curr-weight-array (svref weight-arrays lay-num))
-	     )
-	;; for each neuron in that layer...
-	(dotimes (i num-neurons)
-	  ;; DELTA_I = G'(IN_I) SUM [W_I_J DELTA_J]
-	  ;;         = G(IN_I) * (1 - G(IN_I)) * SUM [ W_I_J DELTA_J ]
-	  ;;         = A_I * (1 - A_I) * SUM [ W_I_J DELTA_J ]
-	  (let* ((my-output (svref curr-out-veck i))
-		 (sum (let ((dotty 0))
-			(dotimes (j num-neurons-next-layer)
-			  (incf dotty (* (aref curr-weight-array i j)
-					 (svref next-delta-veck j))))
-			dotty)))
-	    (setf (svref my-delta-veck i)
-	      (* my-output (- 1 my-output) sum))))))
+       (curr-out-veck (svref output-vecks lay-num))
+       (next-delta-veck (svref delta-vecks (1+ lay-num)))
+       (my-delta-veck (svref delta-vecks lay-num))
+       (num-neurons-next-layer (svref layer-sizes (1+ lay-num)))
+       (curr-weight-array (svref weight-arrays lay-num))
+       )
+  ;; for each neuron in that layer...
+  (dotimes (i num-neurons)
+    ;; DELTA_I = G'(IN_I) SUM [W_I_J DELTA_J]
+    ;;         = G(IN_I) * (1 - G(IN_I)) * SUM [ W_I_J DELTA_J ]
+    ;;         = A_I * (1 - A_I) * SUM [ W_I_J DELTA_J ]
+    (let* ((my-output (svref curr-out-veck i))
+     (sum (let ((dotty 0))
+      (dotimes (j num-neurons-next-layer)
+        (incf dotty (* (aref curr-weight-array i j)
+           (svref next-delta-veck j))))
+      dotty)))
+      (setf (svref my-delta-veck i)
+        (* my-output (- 1 my-output) sum))))))
     
     ;; Now, update all of the weights in the network using the DELTA values
     ;;  For each layer...
     (dotimes (lay-num (1- num-layers))
       (let ((weight-array (svref weight-arrays lay-num))
-	    (delta-veck (svref delta-vecks (1+ lay-num)))
-	    (output-veck (svref output-vecks lay-num)))
-	;; For each neuron N_i in that layer...
-	(dotimes (i (svref layer-sizes lay-num))
-	  ;; For each neuron N_j in the following layer...
-	  (dotimes (j (svref layer-sizes (1+ lay-num)))
-	    ;; Update the weight on the edge from N_i to N_j
-	    ;; W_I_J += ALPHA * A_I * DELTA_J
-	    (incf (aref weight-array i j)
-		  (* alpha 
-		     (svref output-veck i) 
-		     (svref delta-veck j)))))))
+      (delta-veck (svref delta-vecks (1+ lay-num)))
+      (output-veck (svref output-vecks lay-num)))
+  ;; For each neuron N_i in that layer...
+  (dotimes (i (svref layer-sizes lay-num))
+    ;; For each neuron N_j in the following layer...
+    (dotimes (j (svref layer-sizes (1+ lay-num)))
+      ;; Update the weight on the edge from N_i to N_j
+      ;; W_I_J += ALPHA * A_I * DELTA_J
+      (incf (aref weight-array i j)
+      (* alpha 
+         (svref output-veck i) 
+         (svref delta-veck j)))))))
       
     ;; return the NN
     nn))
@@ -829,7 +880,7 @@
 (defun get-output-for (nn inputs)
   (feed-forward nn inputs)
   (let* ((num-layers (nn-num-layers nn))
-	  (out-vecks (nn-output-vecks nn)))
+    (out-vecks (nn-output-vecks nn)))
     (svref out-vecks (1- num-layers))))
 
 
@@ -846,65 +897,10 @@
 (defun train-nn-year
     (nn alpha file)
   (let ((year (read-csv-i file))
-    ;(ctr 0)
-	)
-    (dotimes (j 20)
-      (format t "j = ~A ... " j)
-    ;;for every game in the year
-    (dolist (game year)
-      ; (format t "Game: ~A~%" game)
-      ;;get all of the teams and pitchers involved
-      (let* ((home-team-id (nth HOME-TEAM game))
-	     (home-team-v (gethash home-team-id +teams+))
-	     (visitor-team-id (nth VISITOR-TEAM game))
-	     (visitor-team-v (gethash visitor-team-id +teams+))
-	     (home-pitcher-id (nth HOME-TEAM-STARTER game))
-	     (home-pitcher (gethash home-pitcher-id +pitchers+))
-	     (visitor-pitcher-id (nth VISITOR-TEAM-STARTER game))
-	     (visitor-pitcher (gethash visitor-pitcher-id +pitchers+)))
-      ; (format t "Home-team-id: ~A~%" home-team-id)
-      ; (format t "Type of id: ~A~%" (type-of home-team-id))
-      ; (format t "Home-team: ~A~%" home-team-v)
-      ; (format t "Vis-team-id: ~A~%" visitor-team-id)
-      ; (format t "Vis-team: ~A~%" visitor-team-v)
-	;;when either starter hasnt thrown yet then make a struct for them
-	;;and put it into the the hash table
-	(when (null home-pitcher)
-	  (progn (setf (gethash home-pitcher-id +pitchers+) (init-pitcher))
-		 (setq home-pitcher (gethash home-pitcher-id +pitchers+))))
-	(when (null visitor-pitcher)
-	  (progn (setf (gethash visitor-pitcher-id +pitchers+) (init-pitcher))
-		 (setq visitor-pitcher (gethash visitor-pitcher-id +pitchers+))))
-	;;create a list of the input values and a vector of the desired output
-	(let* ((inputs (list (get-RBIs home-team-v) (get-BA home-team-v)
-			    (get-errors home-team-v) (get-slugging home-team-v)
-			    (get-run-diff home-team-v) (get-ERA home-pitcher)
-			    (get-BAA home-pitcher) (get-slugging-against home-pitcher)
-			    (get-RBIs visitor-team-v) (get-BA visitor-team-v)
-			    (get-errors visitor-team-v) (get-slugging visitor-team-v)
-			    (get-run-diff visitor-team-v) (get-ERA visitor-pitcher)
-			    (get-BAA visitor-pitcher) (get-slugging-against visitor-pitcher)))
-        (vis-runs (parse-integer (nth VISITOR-TEAM-RUNS game)))
-        (h-runs (parse-integer (nth HOME-TEAM-RUNS game)))
-	      (output (list (- vis-runs h-runs))))
-	  ;;train the nn on the given inputs and outputs for the game
-    ; (format t "Train-nn-year reached train-one for iteration ~A~%" ctr)
-	  (train-one nn alpha inputs output)
-	  ;;update the structs based off of the game data
-    ; (format t "Train-nn-year reached update-struct for iteration ~A~%" ctr)
-    ; (incf ctr)
-	  (update-structs home-team-v visitor-team-v home-pitcher visitor-pitcher game)))))))
-
-
-(defun get-year
-    (file)
-  (let ((year (read-csv-i file))
-        (acc ())
-    ;(ctr 0)
   )
+    (dotimes (j 20)
     ;;for every game in the year
     (dolist (game year)
-      ; (format t "Game: ~A~%" game)
       ;;get all of the teams and pitchers involved
       (let* ((home-team-id (nth HOME-TEAM game))
        (home-team-v (gethash home-team-id +teams+))
@@ -914,11 +910,6 @@
        (home-pitcher (gethash home-pitcher-id +pitchers+))
        (visitor-pitcher-id (nth VISITOR-TEAM-STARTER game))
        (visitor-pitcher (gethash visitor-pitcher-id +pitchers+)))
-      ; (format t "Home-team-id: ~A~%" home-team-id)
-      ; (format t "Type of id: ~A~%" (type-of home-team-id))
-      ; (format t "Home-team: ~A~%" home-team-v)
-      ; (format t "Vis-team-id: ~A~%" visitor-team-id)
-      ; (format t "Vis-team: ~A~%" visitor-team-v)
   ;;when either starter hasnt thrown yet then make a struct for them
   ;;and put it into the the hash table
   (when (null home-pitcher)
@@ -928,35 +919,98 @@
     (progn (setf (gethash visitor-pitcher-id +pitchers+) (init-pitcher))
      (setq visitor-pitcher (gethash visitor-pitcher-id +pitchers+))))
   ;;create a list of the input values and a vector of the desired output
-  (let* ((inputs (list (-(get-RBIs home-team-v)) (-(get-BA home-team-v))
-          (get-errors home-team-v) (-(get-slugging home-team-v))
-          (-(get-run-diff home-team-v)) (get-ERA home-pitcher)
+  (let* ((inputs (list (get-RBIs home-team-v) (get-BA home-team-v)
+          (get-errors home-team-v) (get-slugging home-team-v)
+          (get-run-diff home-team-v) (get-ERA home-pitcher)
           (get-BAA home-pitcher) (get-slugging-against home-pitcher)
           (get-RBIs visitor-team-v) (get-BA visitor-team-v)
-          (-(get-errors visitor-team-v)) (get-slugging visitor-team-v)
-          (get-run-diff visitor-team-v) (-(get-ERA visitor-pitcher))
-          (-(get-BAA visitor-pitcher)) (-(get-slugging-against visitor-pitcher))))
+          (get-errors visitor-team-v) (get-slugging visitor-team-v)
+          (get-run-diff visitor-team-v) (get-ERA visitor-pitcher)
+          (get-BAA visitor-pitcher) (get-slugging-against visitor-pitcher)))
         (vis-runs (parse-integer (nth VISITOR-TEAM-RUNS game)))
         (h-runs (parse-integer (nth HOME-TEAM-RUNS game)))
         (output (list (- vis-runs h-runs))))
     ;;train the nn on the given inputs and outputs for the game
-    ; (format t "Train-nn-year reached train-one for iteration ~A~%" ctr)
-    (cons (list inputs output) acc)
+    (train-one nn alpha inputs output)
     ;;update the structs based off of the game data
-    ; (format t "Train-nn-year reached update-struct for iteration ~A~%" ctr)
-    ; (incf ctr)
-    (update-structs home-team-v visitor-team-v home-pitcher visitor-pitcher game))))
-acc))
+    (update-structs home-team-v visitor-team-v home-pitcher visitor-pitcher game)))))))
 
+
+;;function to cenvert the file into a more usable set of i/o pairs
+(defun get-year
+    (file)
+  (let ((year (read-csv-i file))
+    (acc ()))
+    ;;for every game in the year
+    (dolist (game year)
+    ;;get all of the teams and pitchers involved
+    (let* ((home-team-id (nth HOME-TEAM game))
+      (home-team-v (gethash home-team-id +teams+))
+      (visitor-team-id (nth VISITOR-TEAM game))
+      (visitor-team-v (gethash visitor-team-id +teams+))
+      (home-pitcher-id (nth HOME-TEAM-STARTER game))
+      (home-pitcher (gethash home-pitcher-id +pitchers+))
+      (visitor-pitcher-id (nth VISITOR-TEAM-STARTER game))
+      (visitor-pitcher (gethash visitor-pitcher-id +pitchers+)))
+      ;;when either starter hasnt thrown yet then make a struct for them
+      ;;and put it into the the hash table
+      (when (null home-pitcher)
+        (progn (setf (gethash home-pitcher-id +pitchers+) (init-pitcher))
+          (setq home-pitcher (gethash home-pitcher-id +pitchers+))))
+      (when (null visitor-pitcher)
+        (progn (setf (gethash visitor-pitcher-id +pitchers+) (init-pitcher))
+          (setq visitor-pitcher (gethash visitor-pitcher-id +pitchers+))))
+          ;;create a list of the input values and a vector of the desired output
+          (let* ((inputs (list (get-RBIs home-team-v) (get-BA home-team-v)
+            (get-errors home-team-v) (get-slugging home-team-v)
+            (get-run-diff home-team-v) (get-ERA home-pitcher)
+            (get-BAA home-pitcher) (get-slugging-against home-pitcher)
+            (get-RBIs visitor-team-v) (get-BA visitor-team-v)
+            (get-errors visitor-team-v) (get-slugging visitor-team-v)
+            (get-run-diff visitor-team-v) (get-ERA visitor-pitcher)
+            (get-BAA visitor-pitcher) (get-slugging-against visitor-pitcher)))
+          (vis-runs (parse-integer (nth VISITOR-TEAM-RUNS game)))
+          (h-runs (parse-integer (nth HOME-TEAM-RUNS game)))
+          (output (list (- vis-runs h-runs))))
+          ;;add the i/o pair to the acc
+          (setq acc (cons (list inputs output) acc))
+          ;;update the structs based off of the game data
+          (update-structs home-team-v visitor-team-v home-pitcher visitor-pitcher game))))
+          ;;return the data set of i/o pairs
+          acc))
+
+;;trains an nn on the data in a set of input output pairs as opposed to the file
 (defun train-year 
-  (nn alph data)
-  (dotimes (i 10000)
-    (format t "i = ~A,  " i)
+  (nn alph data its)
+  ;;train on inputed set an inputed amount of times
+  (dotimes (i its)
+    ;;go through the set of pairs and train nn
     (dolist (pair data)
       (train-one nn alph (first pair) (second pair)))))
 
-(defconstant SCALE_FACT 1000)
-(defconstant REDUC 1.1)
+
+;;function to test the nn on the set of input output pairs as opposed to the file
+(defun test-nn-year-quick
+  (nn data)
+  ;;accumulators to track the correct predictions as well as the total predictions
+  (let ((correct 0)
+    (total 0))
+    ;;go through the whole set of data
+    (dolist (pair data)
+      (let* ((inputs (first pair))
+        (result (first (second pair)))
+        (result-nn (logit (svref (get-output-for nn inputs) 0))))
+        ;;if the game was predicted correctly then increment correct
+        (when 
+          (or (and (> result 0) (> result-nn 0))
+            (and (< result 0) (< result-nn 0)) 
+            (eql result result-nn))
+          (incf correct))
+          ;;always increment total
+          (incf total)))
+          ;;return the prediction percentage
+          (coerce (/ correct total) 'float)))
+
 
 ;; test-nn-year
 ;;---------------------------------------
@@ -967,125 +1021,76 @@ acc))
 (defun test-nn-year
     (nn file)
   (let ((year (read-csv-i file))
-	(total 0)
-	(correct 0)
-  (ctr 1))
+  (total 0)
+  (correct 0))
     ;;for each game in the year
     (dolist (game year)
       ;;get the teams and pitchers involved in the game
       (let* ((home-team-id (nth HOME-TEAM game))
-             (home-team-v (gethash home-team-id +teams+))
-             (visitor-team-id (nth VISITOR-TEAM game))
-             (visitor-team-v (gethash visitor-team-id +teams+))
-             (home-pitcher-id (nth HOME-TEAM-STARTER game))
-             (home-pitcher (gethash home-pitcher-id +pitchers+))
-             (visitor-pitcher-id (nth VISITOR-TEAM-STARTER game))
-             (visitor-pitcher (gethash visitor-pitcher-id +pitchers+)))
-	;;when either pitcher has not thrown yet create a struct for them
-	;;and put it into the hash table
-        (when (null home-pitcher)
-          (progn (setf (gethash home-pitcher-id +pitchers+) (init-pitcher))
-                 (setf home-pitcher (gethash home-pitcher-id +pitchers+))))
-        (when (null visitor-pitcher)
-          (progn (setf (gethash visitor-pitcher-id +pitchers+) (init-pitcher))
-                 (setf visitor-pitcher (gethash visitor-pitcher-id +pitchers+))))
-	;;get the input list as well as the desired and actual outputs
-        (let* ((inputs (list (get-RBIs home-team-v) (get-BA home-team-v)
-			     (get-errors home-team-v) (get-slugging home-team-v)
-			     (get-run-diff home-team-v) (get-ERA home-pitcher)
-			     (get-BAA home-pitcher) (get-slugging-against home-pitcher)
-			     (get-RBIs visitor-team-v) (get-BA visitor-team-v)
-			     (get-errors visitor-team-v) (get-slugging visitor-team-v)
-			     (get-run-diff visitor-team-v) (get-ERA visitor-pitcher)
-			     (get-BAA visitor-pitcher) (get-slugging-against visitor-pitcher)))
-          (vis-runs (parse-integer (nth VISITOR-TEAM-RUNS game)))
-          (h-runs (parse-integer (nth HOME-TEAM-RUNS game)))
-	        (result (- vis-runs h-runs))
-	        (result-nn (svref (get-output-for nn inputs) 0)))
-	  ;;increase the total games by 1
-    ; (when (> ctr 1200)
-	     (incf total)
-       ; )
-	  ;;if the nn predicted the winner then we increase the correct by 1
-	  ;(format t "inoputs: ~A~%" inputs)
-    (format t "Game result: ~A~%" result)
-    (format t "NN result: ~A~%" result-nn)
-    (when ;(and 
-      (or (and (> result 0) (> result-nn 0))
-		    (and (< result 0) (< result-nn 0)) 
-        (eql result result-nn))
-        ;(> ctr 1200))
-	    (incf correct)))
-    ;(incf ctr)
-    (update-structs home-team-v visitor-team-v home-pitcher visitor-pitcher game)))
-    ;;after going through the whole year return the prediction percentage
-    (coerce (/ correct total) 'float)))
+        (home-team-v (gethash home-team-id +teams+))
+        (visitor-team-id (nth VISITOR-TEAM game))
+        (visitor-team-v (gethash visitor-team-id +teams+))
+        (home-pitcher-id (nth HOME-TEAM-STARTER game))
+        (home-pitcher (gethash home-pitcher-id +pitchers+))
+        (visitor-pitcher-id (nth VISITOR-TEAM-STARTER game))
+        (visitor-pitcher (gethash visitor-pitcher-id +pitchers+)))
+  ;;when either pitcher has not thrown yet create a struct for them
+  ;;and put it into the hash table
+  (when (null home-pitcher)
+    (progn (setf (gethash home-pitcher-id +pitchers+) (init-pitcher))
+      (setf home-pitcher (gethash home-pitcher-id +pitchers+))))
+  (when (null visitor-pitcher)
+    (progn (setf (gethash visitor-pitcher-id +pitchers+) (init-pitcher))
+      (setf visitor-pitcher (gethash visitor-pitcher-id +pitchers+))))
+      ;;get the input list as well as the desired and actual outputs
+      (let* ((inputs (list (get-RBIs home-team-v) (get-BA home-team-v)
+        (get-errors home-team-v) (get-slugging home-team-v)
+        (get-run-diff home-team-v) (get-ERA home-pitcher)
+        (get-BAA home-pitcher) (get-slugging-against home-pitcher)
+        (get-RBIs visitor-team-v) (get-BA visitor-team-v)
+        (get-errors visitor-team-v) (get-slugging visitor-team-v)
+        (get-run-diff visitor-team-v) (get-ERA visitor-pitcher)
+        (get-BAA visitor-pitcher) (get-slugging-against visitor-pitcher)))
+        (vis-runs (parse-integer (nth VISITOR-TEAM-RUNS game)))
+        (h-runs (parse-integer (nth HOME-TEAM-RUNS game)))
+        (result (- vis-runs h-runs))
+        (result-nn (logit (svref (get-output-for nn inputs) 0))))
+        ;;increase the total games by 1
+       (incf total)
+       ;;if the nn predicted the winner then we increase the correct by 1
+       (when ;(and 
+        (or (and (> result 0) (> result-nn 0))
+          (and (< result 0) (< result-nn 0)) 
+          (eql result result-nn))
+        (incf correct)))
+        ;;update the structures to have the information from the game
+        (update-structs home-team-v visitor-team-v home-pitcher visitor-pitcher game)))
+        ;;after going through the whole year return the prediction percentage
+        (coerce (/ correct total) 'float)))
 
-
-;; train-all
-;; -----------------------------------
-;; Inputs: nn, a neural network
-;;         aplha, training sensitivity
-;; Output: none
-;; Side Effect: trains the nn on 2005-2015 data
-
-(defun train-all
-    (nn alpha)
-  (init-hashmap)
-  (setf +pitchers+ (make-hash-table))
-  (train-nn-year nn alpha "bb_data/GL2005.csv")
-  (setf +pitchers+ (make-hash-table))
-  (init-hashmap)
-  (train-nn-year nn alpha "bb_data/GL2006.csv")
-  (setf +pitchers+ (make-hash-table))
-  (init-hashmap)
-  (train-nn-year nn alpha "bb_data/GL2007.csv")
-  (setf +pitchers+ (make-hash-table))
-  (init-hashmap)
-  (train-nn-year nn alpha "bb_data/GL2008.csv")
-  (setf +pitchers+ (make-hash-table))
-  (init-hashmap)
-  (train-nn-year nn alpha "bb_data/GL2009.csv")
-  (setf +pitchers+ (make-hash-table))
-  (init-hashmap)
-  (train-nn-year nn alpha "bb_data/GL2010.csv")
-  (setf +pitchers+ (make-hash-table))
-  (init-hashmap)
-  (train-nn-year nn alpha "bb_data/GL2011.csv")
-  (setf +pitchers+ (make-hash-table))
-  (init-hashmap)
-  (train-nn-year nn alpha "bb_data/GL2012.csv")
-  (setf +pitchers+ (make-hash-table))
-  (init-hashmap)
-  (train-nn-year nn alpha "bb_data/GL2013.csv")
-  (setf +pitchers+ (make-hash-table))
-  (init-hashmap)
-  (train-nn-year nn alpha "bb_data/GL2014.csv")
-  (setf +pitchers+ (make-hash-table))
-  (init-hashmap)
-  (train-nn-year nn alpha "bb_data/GL2015.csv")
-  (setf +pitchers+ (make-hash-table))
-  (init-hashmap))
 
 (defun test-train-nn-year
-  (alph)
-  (let
-    ((nn (init-nn '(16 8 1)))
-    ;(alph 1)
-    (file "bb_data/GL2005.csv"))
-    (init-hashmap)
-    (setf +pitchers+ (make-hash-table :test #'equal))
-    (let ((data (get-year file)))
-      (train-year nn alph data)
-    ;(init-hashmap)
-    ;(setf +pitchers+ (make-hash-table))
-    ;(train-nn-year nn alph "bb_data/GL2006.csv")
-    ;(init-hashmap)
-    ;(setf +pitchers+ (make-hash-table))
-    ;(train-nn-year nn alph "bb_data/GL2007.csv")
-    ;(init-hashmap)
-    ;(setf +pitchers+ (make-hash-table))
-    ;(train-nn-year nn alph "bb_data/GL2008.csv")
-      (init-hashmap)
-      (setf +pitchers+ (make-hash-table :test #'equal))
-      (test-nn-year nn "bb_data/GL2006.csv"))))
+  ()
+  (init-hashmap)
+  (setf +pitchers+ (make-hash-table :test #'equal))
+  (let*
+    ((nnlist (list '(16 4 1)
+      '(16 8 1)
+      '(16 16 1)
+      '(16 32 1)))
+    (alphs '(0.0001 0.01 0.1 0.25 0.5))
+    (its '(250 500 1000))
+    (pct 0.0)
+    (file "bb_data/GL2005.csv")
+    (file-n "bb_data/GL2006.csv")
+    (data (get-year file))
+    (data-n (get-year file-n)))
+    (dolist (config nnlist)
+      (dolist (a alphs)
+        (dolist (i its)
+          (let ((nn (init-nn config)))
+          (train-year nn a data i)
+          (setq pct (test-nn-year-quick nn data-n))
+          (format t "Run for nn~A with alph: ~A and its: ~A gave percentage ~A~%" (second config) a i pct)
+          ))))
+    ))

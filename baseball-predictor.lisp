@@ -115,16 +115,21 @@
 ;;         divided by 9 to make it a value between 0 and 1
 ;;         if the value is >1 return 1.0
 
+;(defun get-ERA
+;    (pitcher)
+;  (let* ((ER-per-out (coerce (/ (pitcher-ERs pitcher)
+;				(pitcher-outs pitcher))
+;			     'float))
+;	 (our-ERA (* ER-per-out 3)))
+;    (if (> our-ERA 1.0)
+;	1.0
+;      our-ERA)))
+
 (defun get-ERA
     (pitcher)
-  (let* ((ER-per-out (coerce (/ (pitcher-ERs pitcher)
-				(pitcher-outs pitcher))
-			     'float))
-	 (our-ERA (* ER-per-out 3)))
-    (if (> our-ERA 1.0)
-	1.0
-      our-ERA)))
-
+  (coerce (* 27 (/ (pitcher-ERs pitcher)
+		   (pitcher-outs pitcher))
+	     'float)))
 ;; get-BAA
 ;;--------------------------------
 ;; Input: pitcher a pitcher struct
@@ -134,8 +139,7 @@
     (pitcher)
   (coerce (/ (pitcher-hits pitcher)
 	     (pitcher-ABs pitcher))
-	  'float))
-
+	  'float))  
 
 ;;team functions
 
@@ -145,15 +149,21 @@
 ;; Output: the RBIs per innning or 1.0 if this value
 ;;         is larger than 1.0
 
+;(defun get-RBIs
+;    (team)
+;  (let* ((RBI-game (coerce (/ (team-RBIs team)
+;			      (team-games team))
+;			   'float))
+;	 (RBI-inning (/ RBI-game 9)))
+;    (if (> RBI-inning 1.0)
+;	1.0
+;      RBI-inning)))
+
 (defun get-RBIs
     (team)
-  (let* ((RBI-game (coerce (/ (team-RBIs team)
-			      (team-games team))
-			   'float))
-	 (RBI-inning (/ RBI-game 9)))
-    (if (> RBI-inning 1.0)
-	1.0
-      RBI-inning)))
+  (coerce (/ (team-RBIs team)
+	     (team-games team))
+	  'float))  
 
 ;; get-BA
 ;;-------------------------------
@@ -172,16 +182,21 @@
 ;; Output: the teams errors per inning or 1
 ;;         if it is greater than 1 somehow
 
+;(defun get-errors
+;    (team)
+;  (let* ((errors-game (coerce (/ (team-errors team)
+;				 (team-games team))
+;			      'float))
+;	 (errors-inning (/ errors-game 9)))
+;    (if (> errors-inning 1.0)
+;	1.0
+;      errors-inning)))
+
 (defun get-errors
     (team)
-  (let* ((errors-game (coerce (/ (team-errors team)
-				 (team-games team))
-			      'float))
-	 (errors-inning (/ errors-game 9)))
-    (if (> errors-inning 1.0)
-	1.0
-      errors-inning)))
-
+  (coerce (/ (team-errors team)                                                                           
+	     (team-games team))                                                                          
+	  'float))  
 
 ;; get-slugging
 ;; --------------------------
@@ -217,22 +232,34 @@
 ;; Output: the teams average run diff over
 ;;         the last 10 games
 
+;(defun get-run-diff
+;    (team)
+;  (let* ((arr (team-run-diffs team))
+;	 (diff (+ (aref arr 0) (aref arr 1)
+;		  (aref arr 2) (aref arr 3)
+;		  (aref arr 4) (aref arr 5)
+;                  (aref arr 6) (aref arr 7)
+;		  (aref arr 8) (aref arr 9)))
+;	 (avg-diff (coerce (/ diff 90)
+;			   'float)))
+;    (when (> avg-diff 1.0)
+;      1.0)
+;    (when (< avg-diff -1.0)
+;      -1.0)
+;    avg-diff))
+
+
 (defun get-run-diff
     (team)
   (let* ((arr (team-run-diffs team))
-	 (diff (+ (aref arr 0) (aref arr 1)
-		  (aref arr 2) (aref arr 3)
-		  (aref arr 4) (aref arr 5)
+         (diff (+ (aref arr 0) (aref arr 1)
+                  (aref arr 2) (aref arr 3)
+                  (aref arr 4) (aref arr 5)
                   (aref arr 6) (aref arr 7)
-		  (aref arr 8) (aref arr 9)))
-	 (avg-diff (coerce (/ diff 90)
-			   'float)))
-    (when (> avg-diff 1.0)
-      1.0)
-    (when (< avg-diff -1.0)
-      -1.0)
+                  (aref arr 8) (aref arr 9)))
+         (avg-diff (coerce (/ diff 10)
+                           'float)))
     avg-diff))
-
 
 
 

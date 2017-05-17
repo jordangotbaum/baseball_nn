@@ -18,8 +18,10 @@
 Our objective was to create an ANN that could predict the outcomes of baseball games given input data with relatively reliable results. 
 
 \section{Data}     % section 2.1
+The data that we ran our ANN on was game logs from retrosheet.org.  This data came in files with all of the games for one year and included information about who played, how many runs were scored, as well as the majority of the team stats for the game.
 
 \section{Design}
+We designed our ANN to look at the stats for the 2 teams playing as well as the 2 starting pitchers for the game.  We had pitcher and team structures to keep these statistics stored.  As we would iterate through the file game by game, we would first run the current statistics through the ANN and after we would update all of the structures.  This was done in both our training and testing so there would be no impact from the current game in predicting its own outcome.
 
 \section{Results}  
 

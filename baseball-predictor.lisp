@@ -115,22 +115,23 @@
 ;;         divided by 9 to make it a value between 0 and 1
 ;;         if the value is >1 return 1.0
 
-;(defun get-ERA
-;    (pitcher)
-;  (let* ((ER-per-out (coerce (/ (pitcher-ERs pitcher)
-;				(pitcher-outs pitcher))
-;			     'float))
-;	 (our-ERA (* ER-per-out 3)))
-;    (if (> our-ERA 1.0)
-;	1.0
-;      our-ERA)))
+; (defun get-ERA
+;     (pitcher)
+;   (let* ((ER-per-out (coerce (/ (pitcher-ERs pitcher)
+; 				(pitcher-outs pitcher))
+; 			     'float))
+; 	 (our-ERA (* ER-per-out 3)))
+;     (if (> our-ERA 1.0)
+; 	1.0
+;       our-ERA)))
 
 (defun get-ERA
-    (pitcher)
-  (coerce (* 27 (/ (pitcher-ERs pitcher)
-		   (pitcher-outs pitcher))
-	     'float)))
-;; get-BAA
+   (pitcher)
+ (coerce (* 27 (/ (pitcher-ERs pitcher)
+		   (pitcher-outs pitcher)))
+	  'float))
+
+; get-BAA
 ;;--------------------------------
 ;; Input: pitcher a pitcher struct
 ;; Output: the BAA in the games the pitcher throws
@@ -149,19 +150,19 @@
 ;; Output: the RBIs per innning or 1.0 if this value
 ;;         is larger than 1.0
 
-;(defun get-RBIs
-;    (team)
-;  (let* ((RBI-game (coerce (/ (team-RBIs team)
-;			      (team-games team))
-;			   'float))
-;	 (RBI-inning (/ RBI-game 9)))
-;    (if (> RBI-inning 1.0)
-;	1.0
-;      RBI-inning)))
+; (defun get-RBIs
+;     (team)
+;   (let* ((RBI-game (coerce (/ (team-RBIs team)
+; 			      (team-games team))
+; 			   'float))
+; 	 (RBI-inning (/ RBI-game 9)))
+;     (if (> RBI-inning 1.0)
+; 	1.0
+;       RBI-inning)))
 
 (defun get-RBIs
-    (team)
-  (coerce (/ (team-RBIs team)
+   (team)
+ (coerce (/ (team-RBIs team)
 	     (team-games team))
 	  'float))  
 
@@ -182,19 +183,19 @@
 ;; Output: the teams errors per inning or 1
 ;;         if it is greater than 1 somehow
 
-;(defun get-errors
-;    (team)
-;  (let* ((errors-game (coerce (/ (team-errors team)
-;				 (team-games team))
-;			      'float))
-;	 (errors-inning (/ errors-game 9)))
-;    (if (> errors-inning 1.0)
-;	1.0
-;      errors-inning)))
+; (defun get-errors
+;     (team)
+;   (let* ((errors-game (coerce (/ (team-errors team)
+; 				 (team-games team))
+; 			      'float))
+; 	 (errors-inning (/ errors-game 9)))
+;     (if (> errors-inning 1.0)
+; 	1.0
+;       errors-inning)))
 
 (defun get-errors
-    (team)
-  (coerce (/ (team-errors team)                                                                           
+   (team)
+ (coerce (/ (team-errors team)                                                                           
 	     (team-games team))                                                                          
 	  'float))  
 
@@ -232,34 +233,34 @@
 ;; Output: the teams average run diff over
 ;;         the last 10 games
 
-;(defun get-run-diff
-;    (team)
-;  (let* ((arr (team-run-diffs team))
-;	 (diff (+ (aref arr 0) (aref arr 1)
-;		  (aref arr 2) (aref arr 3)
-;		  (aref arr 4) (aref arr 5)
-;                  (aref arr 6) (aref arr 7)
-;		  (aref arr 8) (aref arr 9)))
-;	 (avg-diff (coerce (/ diff 90)
-;			   'float)))
-;    (when (> avg-diff 1.0)
-;      1.0)
-;    (when (< avg-diff -1.0)
-;      -1.0)
-;    avg-diff))
+; (defun get-run-diff
+;     (team)
+;   (let* ((arr (team-run-diffs team))
+; 	 (diff (+ (aref arr 0) (aref arr 1)
+; 		  (aref arr 2) (aref arr 3)
+; 		  (aref arr 4) (aref arr 5)
+;                   (aref arr 6) (aref arr 7)
+; 		  (aref arr 8) (aref arr 9)))
+; 	 (avg-diff (coerce (/ diff 90)
+; 			   'float)))
+;     (when (> avg-diff 1.0)
+;       1.0)
+;     (when (< avg-diff -1.0)
+;       -1.0)
+;     avg-diff))
 
 
 (defun get-run-diff
-    (team)
-  (let* ((arr (team-run-diffs team))
-         (diff (+ (aref arr 0) (aref arr 1)
-                  (aref arr 2) (aref arr 3)
-                  (aref arr 4) (aref arr 5)
-                  (aref arr 6) (aref arr 7)
-                  (aref arr 8) (aref arr 9)))
-         (avg-diff (coerce (/ diff 10)
-                           'float)))
-    avg-diff))
+   (team)
+ (let* ((arr (team-run-diffs team))
+        (diff (+ (aref arr 0) (aref arr 1)
+                 (aref arr 2) (aref arr 3)
+                 (aref arr 4) (aref arr 5)
+                 (aref arr 6) (aref arr 7)
+                 (aref arr 8) (aref arr 9)))
+        (avg-diff (coerce (/ diff 10)
+                          'float)))
+   avg-diff))
 
 
 
@@ -664,7 +665,13 @@
 ;;;  SIGMOID(X) = 1/(1 + e^(-x)) -- the sigmoid (or logistic) function
      
 (defun sigmoid (x)
-  (/ 1.0 (+ 1 (exp (- x)))))
+  (cond
+   ((<= x -30)
+    0)
+   ((>= x 30)
+    1)
+   (t
+    (/ 1.0 (+ 1 (exp (- x)))))))
 
 ;;;  FEED-FORWARD
 ;;; ----------------------------------------------------------
@@ -840,7 +847,9 @@
     (nn alpha file)
   (let ((year (read-csv-i file))
     ;(ctr 0)
-    )
+	)
+    (dotimes (j 20)
+      (format t "j = ~A ... " j)
     ;;for every game in the year
     (dolist (game year)
       ; (format t "Game: ~A~%" game)
@@ -862,10 +871,10 @@
 	;;and put it into the the hash table
 	(when (null home-pitcher)
 	  (progn (setf (gethash home-pitcher-id +pitchers+) (init-pitcher))
-		 (setf home-pitcher (gethash home-pitcher-id +pitchers+))))
+		 (setq home-pitcher (gethash home-pitcher-id +pitchers+))))
 	(when (null visitor-pitcher)
 	  (progn (setf (gethash visitor-pitcher-id +pitchers+) (init-pitcher))
-		 (setf visitor-pitcher (gethash visitor-pitcher-id +pitchers+))))
+		 (setq visitor-pitcher (gethash visitor-pitcher-id +pitchers+))))
 	;;create a list of the input values and a vector of the desired output
 	(let* ((inputs (list (get-RBIs home-team-v) (get-BA home-team-v)
 			    (get-errors home-team-v) (get-slugging home-team-v)
@@ -884,8 +893,67 @@
 	  ;;update the structs based off of the game data
     ; (format t "Train-nn-year reached update-struct for iteration ~A~%" ctr)
     ; (incf ctr)
-	  (update-structs home-team-v visitor-team-v home-pitcher visitor-pitcher game))))))
+	  (update-structs home-team-v visitor-team-v home-pitcher visitor-pitcher game)))))))
 
+
+(defun get-year
+    (file)
+  (let ((year (read-csv-i file))
+        (acc ())
+    ;(ctr 0)
+  )
+    ;;for every game in the year
+    (dolist (game year)
+      ; (format t "Game: ~A~%" game)
+      ;;get all of the teams and pitchers involved
+      (let* ((home-team-id (nth HOME-TEAM game))
+       (home-team-v (gethash home-team-id +teams+))
+       (visitor-team-id (nth VISITOR-TEAM game))
+       (visitor-team-v (gethash visitor-team-id +teams+))
+       (home-pitcher-id (nth HOME-TEAM-STARTER game))
+       (home-pitcher (gethash home-pitcher-id +pitchers+))
+       (visitor-pitcher-id (nth VISITOR-TEAM-STARTER game))
+       (visitor-pitcher (gethash visitor-pitcher-id +pitchers+)))
+      ; (format t "Home-team-id: ~A~%" home-team-id)
+      ; (format t "Type of id: ~A~%" (type-of home-team-id))
+      ; (format t "Home-team: ~A~%" home-team-v)
+      ; (format t "Vis-team-id: ~A~%" visitor-team-id)
+      ; (format t "Vis-team: ~A~%" visitor-team-v)
+  ;;when either starter hasnt thrown yet then make a struct for them
+  ;;and put it into the the hash table
+  (when (null home-pitcher)
+    (progn (setf (gethash home-pitcher-id +pitchers+) (init-pitcher))
+     (setq home-pitcher (gethash home-pitcher-id +pitchers+))))
+  (when (null visitor-pitcher)
+    (progn (setf (gethash visitor-pitcher-id +pitchers+) (init-pitcher))
+     (setq visitor-pitcher (gethash visitor-pitcher-id +pitchers+))))
+  ;;create a list of the input values and a vector of the desired output
+  (let* ((inputs (list (-(get-RBIs home-team-v)) (-(get-BA home-team-v))
+          (get-errors home-team-v) (-(get-slugging home-team-v))
+          (-(get-run-diff home-team-v)) (get-ERA home-pitcher)
+          (get-BAA home-pitcher) (get-slugging-against home-pitcher)
+          (get-RBIs visitor-team-v) (get-BA visitor-team-v)
+          (-(get-errors visitor-team-v)) (get-slugging visitor-team-v)
+          (get-run-diff visitor-team-v) (-(get-ERA visitor-pitcher))
+          (-(get-BAA visitor-pitcher)) (-(get-slugging-against visitor-pitcher))))
+        (vis-runs (parse-integer (nth VISITOR-TEAM-RUNS game)))
+        (h-runs (parse-integer (nth HOME-TEAM-RUNS game)))
+        (output (list (- vis-runs h-runs))))
+    ;;train the nn on the given inputs and outputs for the game
+    ; (format t "Train-nn-year reached train-one for iteration ~A~%" ctr)
+    (cons (list inputs output) acc)
+    ;;update the structs based off of the game data
+    ; (format t "Train-nn-year reached update-struct for iteration ~A~%" ctr)
+    ; (incf ctr)
+    (update-structs home-team-v visitor-team-v home-pitcher visitor-pitcher game))))
+acc))
+
+(defun train-year 
+  (nn alph data)
+  (dotimes (i 10000)
+    (format t "i = ~A,  " i)
+    (dolist (pair data)
+      (train-one nn alph (first pair) (second pair)))))
 
 (defconstant SCALE_FACT 1000)
 (defconstant REDUC 1.1)
@@ -939,17 +1007,17 @@
 	     (incf total)
        ; )
 	  ;;if the nn predicted the winner then we increase the correct by 1
-	  
+	  ;(format t "inoputs: ~A~%" inputs)
     (format t "Game result: ~A~%" result)
     (format t "NN result: ~A~%" result-nn)
     (when ;(and 
       (or (and (> result 0) (> result-nn 0))
-		    (and (< result 0) (< result-nn 0))
+		    (and (< result 0) (< result-nn 0)) 
         (eql result result-nn))
         ;(> ctr 1200))
-	    (incf correct))
+	    (incf correct)))
     ;(incf ctr)
-    )))
+    (update-structs home-team-v visitor-team-v home-pitcher visitor-pitcher game)))
     ;;after going through the whole year return the prediction percentage
     (coerce (/ correct total) 'float)))
 
@@ -1000,21 +1068,24 @@
   (init-hashmap))
 
 (defun test-train-nn-year
-  ()
+  (alph)
   (let
     ((nn (init-nn '(16 8 1)))
-    (alph 0.02)
+    ;(alph 1)
     (file "bb_data/GL2005.csv"))
     (init-hashmap)
-    (setf +pitchers+ (make-hash-table))
-    (train-nn-year nn alph file)
-    (init-hashmap)
-    (setf +pitchers+ (make-hash-table))
-    (train-nn-year nn alph "bb_data/GL2006.csv")
-    (init-hashmap)
-    (setf +pitchers+ (make-hash-table))
-    (train-nn-year nn alph "bb_data/GL2007.csv")
-    (init-hashmap)
-    (setf +pitchers+ (make-hash-table))
-    (train-nn-year nn alph "bb_data/GL2008.csv")
-    (test-nn-year nn "bb_data/GL2009.csv")))
+    (setf +pitchers+ (make-hash-table :test #'equal))
+    (let ((data (get-year file)))
+      (train-year nn alph data)
+    ;(init-hashmap)
+    ;(setf +pitchers+ (make-hash-table))
+    ;(train-nn-year nn alph "bb_data/GL2006.csv")
+    ;(init-hashmap)
+    ;(setf +pitchers+ (make-hash-table))
+    ;(train-nn-year nn alph "bb_data/GL2007.csv")
+    ;(init-hashmap)
+    ;(setf +pitchers+ (make-hash-table))
+    ;(train-nn-year nn alph "bb_data/GL2008.csv")
+      (init-hashmap)
+      (setf +pitchers+ (make-hash-table :test #'equal))
+      (test-nn-year nn "bb_data/GL2006.csv"))))
